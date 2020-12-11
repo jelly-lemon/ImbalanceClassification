@@ -8,8 +8,8 @@ def objection_1(S, U):
     """
     目标函数 1
 
-    :param S:相似度矩阵
-    :param U:预测结果概率矩阵
+    :param S:样本相似度矩阵
+    :param U:某个基分类器预测结果概率矩阵
     :return:目标函数值
     """
     n_sample = len(U)
@@ -20,20 +20,20 @@ def objection_1(S, U):
     return sum
 
 
-def objection_2(n_cluster, R, U, Q):
+def objection_2(n_cluster_center, R, U, Q):
     """
     目标函数 2
 
-    :param n_cluster:聚类器数量
-    :param R:聚类结果矩阵
-    :param U:预测结果概率矩阵
-    :param Q:聚类质心矩阵
+    :param n_cluster_center:聚类器质心数量
+    :param R:所有样本聚类结果矩阵
+    :param U:某个分类器预测结果概率矩阵
+    :param Q:某个分类器对聚类质心的分类结果
     :return:
     """
     n_sample = len(U)
     sum = 0
     for i in range(n_sample):
-        for j in range(n_cluster):
+        for j in range(n_cluster_center):
             sum += R[i][j] * np.linalg.norm(U[i] - Q[j])
     return sum
 
@@ -57,7 +57,7 @@ def sim(i, j):
     return gaussian(i, j, 1)
 
 
-def get_S_matrix(y_prob):
+def get_S_matrix(x):
     """
     计算相似度
 
@@ -72,17 +72,17 @@ def get_S_matrix(y_prob):
      [0.32259073 1.         0.32259073]
      [0.10406478 0.32259073 1.]]
 
-    :param y_prob:预测结果分数
+    :param x:预测结果分数
     :return: 相似度矩阵
     """
-    mat = np.zeros((len(y_prob), len(y_prob)))
-    for i, i_value in enumerate(y_prob):
-        for j, j_value in enumerate(y_prob):
+    mat = np.zeros((len(x), len(x)))
+    for i, i_value in enumerate(x):
+        for j, j_value in enumerate(x):
             mat[i][j] = sim(i_value, j_value)
     return mat
 
 
-def get_R_matrix(result):
+def get_R_matrix(result, n_cluster_center):
     """
     将获得的聚类结果转 one-hot 矩阵
 
@@ -98,7 +98,8 @@ def get_R_matrix(result):
     :param result: 聚类结果
     :return:
     """
-    mat = np.zeros((len(result), len(np.unique(result))), np.uint8)
+
+    mat = np.zeros((len(result), n_cluster_center), np.uint8)
     for index, num in enumerate(result):
         mat[index][num] = 1
 

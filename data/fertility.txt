@@ -1,3 +1,5 @@
+@attribute Band_type{N,O}
+@inputs Season, Age, Childish, Accident, Surgical, fevers, alcohol, Smoking, sitting
 -0.33,0.69,0,1,1,0,0.8,0,0.88,N
 -0.33,0.94,1,0,1,0,0.8,1,0.31,O
 -0.33,0.5,1,0,0,0,1,-1,0.5,N

@@ -1,15 +1,12 @@
 # 描述：基于密度的下采样器
 # 作者：Jelly Lemon
-
 import random
 import numpy as np
-from sklearn import metrics
-from sklearn.model_selection import KFold
-from sklearn.neighbors import KNeighborsClassifier
-from read_data import yeast1
+from read_data import get_data
 
 
-class DBUOperator:
+
+class DBUSampler:
     """
     Density-Based Undersampling Operator 基于密度的下采样器
 
@@ -18,8 +15,8 @@ class DBUOperator:
 
     Examples
     --------
-    >>> dub = DBUOperator()
-    >>> new_x, new_y = dub.fit(x, y)
+    dub = DBUOperator()
+    new_x, new_y = dub.fit(x, y)
     """
 
     def __init__(self, K_Neighbor=5, H_Neighbor=5):
@@ -32,65 +29,122 @@ class DBUOperator:
         self.K_Neighbor = K_Neighbor
         self.H_Neighbor = H_Neighbor
 
-    def fit(self, x, y):
+        # 初始化相关变量
+        self.sampling_rate = None  # 采样率
+        self.delt_star = None  # 累计密度因子
+        self.all_Ri = None  # 采样间隔范围
+        self.all_delt_p_i = None  # 样本xi在正样本集中的密度
+        self.all_delt_n_i = None  # 样本xi在负样本集中的密度
+        self.all_Dpi = None  # 样本xi在正样本集中k邻居距离之和
+        self.all_Dni = None  # 样本xi在负样本集中h邻居距离之和
+        self.all_delt_i = None  # 样本xi的采样边界
+        self.dis_p = None  # 正样本集合中各点之间的距离
+        self.dis_n = None  # 正样本xi到负样本集中各点之间的距离
+
+    def calc_dis_p(self, dis_p, T_p):
+        """
+        计算正样本中各点之间的距离
+
+        :param dis_p: 保存距离的变量
+        :param T_p: 正样本集
+        :return:
+        """
+        # dis_p 是一个对称方阵
+        # 所以算上三角就好了，下三角直接复制
+        # i,j 表示样本编号，从1开始
+        for i in range(1, len(T_p)+1):
+            for j in range(i, len(T_p)+1):
+                # 上三角
+                dis_p[i-1][j-1] = np.sqrt(np.sum(np.square(np.array(T_p[i-1]) - np.array(T_p[j-1]))))
+                # 下三角
+                dis_p[j-1][i-1] = dis_p[i-1][j-1]
+
+        return dis_p
+
+    def calc_dis_n(self, dis_n, T_p, T_n):
+        """
+        计算正样本中到负样本中各点的距离
+
+        :param dis_n: 保存距离的变量
+        :param T_p:正样本
+        :param T_n:负样本
+        :return:
+        """
+        for i in range(1, len(T_p)+1):
+            for j in range(1, len(T_n)+1):
+                dis_n[i-1][j-1] = np.sqrt(np.sum(np.square(np.array(T_p[i-1]) - np.array(T_n[j-1]))))
+
+        return dis_n
+
+    def fit_resample(self, x, y, sampling_rate = None):
         """
         下采样数据集，返回的格式和输入相同，只是量变少了
 
         :return: 采样后的数据集
         """
-        # 样本分类
+        # 统计样本信息
+        self.N = len(y) # 样本个数
         self.T_p = [list(x[i]) for i in range(len(y)) if y[i] == 1]  # 正样本集
         self.T_n = [list(x[i]) for i in range(len(y)) if y[i] == 0]  # 负样本集
-        self.R = len(self.T_p) / len(self.T_n)  # 样本比例（多比少，大于1）
-        self.P = len(self.T_p)  # 正样本数量
-        self.N = len(self.T_n)  # 负样本数量
+        self.N_pos = len(self.T_p)  # 正样本数量
+        self.N_neg = len(self.T_n)  # 负样本数量
+
+        if sampling_rate is None:
+            # 根据不平衡比设定采样率
+            if self.N_pos/self.N_neg <= 5:
+                self.sampling_rate = 0.3
+            else:
+                self.sampling_rate = 0.1
+        else:
+            self.sampling_rate = sampling_rate
 
         # 初始化相关变量
         self.delt_star = None  # 累计密度因子
-        self.all_Ri = [[] for i in range(self.P)]  # 采样间隔范围
-        self.all_delt_p_i = [-1] * self.P  # 样本xi在正样本集中的密度
-        self.all_delt_n_i = [-1] * self.P  # 样本xi在负样本集中的密度
-        self.all_Dpi = [[] for i in range(self.P)]  # 样本xi在正样本集中k邻居距离之和
-        self.all_Dni = [[] for i in range(self.P)]  # 样本xi在负样本集中h邻居距离之和
-        self.all_delt_i = [-1] * self.P  # 样本xi的采样边界
-        self.dis_p = [[-1] * self.P] * self.P  # 正样本集合中各点之间的距离
-        self.dis_n = [[-1] * self.N] * self.P  # 正样本xi到负样本集中各点之间的距离
+        self.all_Ri = [[] for i in range(self.N_pos)]  # 采样间隔范围
+        self.all_delt_p_i = [-1 for i in range(self.N_pos)]  # 样本xi在正样本集中的密度
+        self.all_delt_n_i = [-1 for i in range(self.N_pos)]  # 样本xi在负样本集中的密度
+        self.all_Dpi = [[] for i in range(self.N_pos)]  # 样本xi在正样本集中k邻居距离之和
+        self.all_Dni = [[] for i in range(self.N_pos)]  # 样本xi在负样本集中h邻居距离之和
+        self.all_delt_i = [-1 for i in range(self.N_pos)]  # 样本xi的采样边界
+        self.dis_p = [[-1 for i in range(self.N_pos)] for i in range(self.N_pos)]  # 正样本集合中各点之间的距离
+        self.dis_n = [[-1 for i in range(self.N_neg)] for j in range(self.N_pos)]  # 正样本xi到负样本集中各点之间的距离
 
         # 求正样本集中各点之间的距离
-        print("计算正样本集中各点之间的距离...")
-        for i, p1 in enumerate(self.T_p):
-            for j, p2 in enumerate(self.T_p):
-                d = np.sqrt(np.sum(np.square(np.array(p1) - np.array(p2))))
-                self.dis_p[i][j] = d
+        print("计算正样本集中各点之间的距离...", end="")
+        self.dis_p = self.calc_dis_p(self.dis_p, self.T_p)
 
         # 正样本xi到负样本集中各点之间的距离
-        print("计算正样本xi到负样本集中各点之间的距离...")
-        for i, p1 in enumerate(self.T_p):
-            for j, p2 in enumerate(self.T_n):
-                d = np.sqrt(np.sum(np.square(np.array(p1) - np.array(p2))))
-                self.dis_n[i][j] = d
+        print("\r计算正样本xi到负样本集中各点之间的距离...", end="")
+        self.dis_n = self.calc_dis_n(self.dis_n, self.T_p, self.T_n)
 
         # 计算 Ri
-        print("计算Ri...")
-        for i in range(1, self.P + 1):
+        print("\r计算Ri...", end="")
+        for i in range(1, self.N_pos + 1):
             self.Ri(i)  # i表示样本编号，从1开始
 
         # 开始采样
-        print("开始采样...")
+        print("\r开始采样（采样率%.2f）..." % self.sampling_rate)
         count = 0  # 当前采样个数
         T_p_new = []  # 存放采样样本的集合
-        while count < self.N:
+        while count < int(self.N_pos * self.sampling_rate):
             # 随机生成 [0,1] 的一个数
             r = random.uniform(0, 1)
-            for i in range(1, self.P + 1):  # j表示样本编号，从1开始
+            # print("r=%f" % r)
+            for i in range(1, self.N_pos + 1):  # j表示样本编号，从1开始
                 start, end = self.Ri(i)
                 if start < r <= end:
                     if self.T_p[i - 1] not in T_p_new:
                         count += 1
+                        # print(count)
                         # print("加入一个样本（编号%d），还差%d个" % (i, self.N - count))
                         T_p_new.append(self.T_p[i - 1])
-                        if count == self.N:
-                            break
+
+                        # 第1种break方式
+                        break
+
+                        # 第2种break方式
+                        # if count == self.N:
+                        #     break
 
         T_new = T_p_new + self.T_n
         y_p = np.ones((len(T_p_new),), dtype=np.uint8)
@@ -140,7 +194,7 @@ class DBUOperator:
         """
         if len(self.all_Ri[i - 1]) == 0:
             # 把所有的 Ri 都计算出来
-            for j in range(1, self.P + 1):
+            for j in range(1, self.N_pos + 1):
                 start = self.delt_i(j - 1) / self.get_delt_star()
                 end = self.delt_i(j) / self.get_delt_star()
                 self.all_Ri[j - 1] = (start, end)
@@ -155,7 +209,10 @@ class DBUOperator:
         :return:xi在正样本集的密度
         """
         if self.all_delt_p_i[i - 1] == -1:
-            res = 1 / np.mean(self.D_p_i(i))
+            if np.mean(self.D_p_i(i)) == 0:
+                res = 1
+            else:
+                res = 1 / np.mean(self.D_p_i(i))
             self.all_delt_p_i[i - 1] = res
 
         return self.all_delt_p_i[i - 1]
@@ -208,58 +265,5 @@ class DBUOperator:
             return res
 
 
-if __name__ == '__main__':
-    # 原始数据
-    x, y = yeast1()
-    x = np.array(x)
-    y = np.array(y)
-    print("总数据 pos:%d neg:%d" % (len(y[y == 1]), len(y[y == 0])))
 
-    # 记录评估结果
-    val_history = {}
-    val_history["val_acc"] = []
-    val_history["val_precision"] = []
-    val_history["val_recall"] = []
-    val_history["val_f1"] = []
-    val_history["auc_value"] = []
 
-    # k折交叉
-    kf = KFold(n_splits=10, shuffle=True)
-    cur_k = 0
-    for train_index, val_index in kf.split(x, y):
-        # 划分数据
-        cur_k += 1
-        x_train, y_train = x[train_index], y[train_index]
-        x_val, y_val = x[val_index], y[val_index]
-        print("k = %d" % cur_k)
-
-        # 构建模型，训练
-        x_train, y_train = DBUOperator().fit(x_train, y_train)  # 随机抽样
-        clf = KNeighborsClassifier()
-        print("开始训练模型...")
-        clf.fit(x_train, y_train)
-
-        # 测试
-        print("开始评估模型...")
-        y_proba = clf.predict_proba(x_val)
-        y_pred = np.argmax(y_proba, axis=1)
-
-        # 评估测试集
-        val_acc = metrics.accuracy_score(y_val, y_pred)
-        val_precision = metrics.precision_score(y_val, y_pred)
-        val_recall = metrics.recall_score(y_val, y_pred)
-        val_f1 = metrics.f1_score(y_val, y_pred)
-        auc_value = metrics.roc_auc_score(y_val, y_proba[:, 1])
-
-        val_history["val_acc"].append(val_acc)
-        val_history["val_precision"].append(val_precision)
-        val_history["val_recall"].append(val_recall)
-        val_history["val_f1"].append(val_f1)
-        val_history["auc_value"].append(auc_value)
-
-        print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f" %
-              (val_acc, val_precision, val_recall, val_f1, auc_value))
-
-    # 统计，求平均值和标准差
-    for k in val_history.keys():
-        print("%s:%.4f ±%.4f" % (k, np.mean(val_history[k]), np.std(val_history[k])))

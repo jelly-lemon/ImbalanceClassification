@@ -1,16 +1,21 @@
+# 描述：读取指定文件里面的数据
+
 import random
 import numpy as np
 
 
+# 数据根目录
 root_dir = "./data"
+
 
 def shuffle_data(x, y):
     """
-    打乱数据
+    先将样本和标签组合，然后打乱
 
-    :param x:
-    :param y:
-    :return:
+    不会改变样本对应的标签，只是打乱样本与样本之间的顺序，对应标签会跟着一起打乱
+    :param x:样本
+    :param y:标签
+    :return:打乱后的数据
     """
     data = list(zip(x, y))
     random.shuffle(data)
@@ -18,610 +23,128 @@ def shuffle_data(x, y):
 
     return x, y
 
-def ecoli0_1_4_7_vs_2_3_5_6():
-    label = ("cp", "im", "imS", "imL", "imU", "om", "omL", "pp")
-    pos_label = (label[0], label[1], label[4], label[7])
-    neg_label = (label[2], label[3], label[5], label[6])
-    file_dir = root_dir + "/ecoli.dat"
-    x_pos = []
-    x_neg = []
 
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                tag = line.split(",")[-1]
-                tag = tag.replace(" ", "")
-                tag = tag.replace("\n", "")
-
-                if tag in pos_label:
-                    x_pos.append(t)
-                elif tag in neg_label:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def ecoli3():
-    label = ("cp", "im", "imS", "imL", "imU", "om", "omL", "pp")
-    pos_label = label[3]
-    file_dir = root_dir + "/ecoli.dat"
-    x_pos = []
-    x_neg = []
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def ecoli1():
-    label = ("cp", "im", "imS", "imL", "imU", "om", "omL", "pp")
-    pos_label = label[1]
-    file_dir = root_dir + "/ecoli.dat"
-    x_pos = []
-    x_neg = []
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def ecoli2():
-    label = ("cp", "im", "imS", "imL", "imU", "om", "omL", "pp")
-    pos_label = label[2]
-    file_dir = root_dir + "/ecoli.dat"
-    x_pos = []
-    x_neg = []
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def vehicle2():
-    label = ("van", "saab", "bus", "opel")
-    pos_label = label[2]
-    file_dir = root_dir + "/vehicle.dat"
-    x_pos = []
-    x_neg = []
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def vehicle1():
-    label = ("van", "saab", "bus", "opel")
-    pos_label = label[1]
-    file_dir = root_dir + "/vehicle.dat"
-    x_pos = []
-    x_neg = []
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def yeast1():
+def get_data(neg_no, pos_no, file_name, shuffle = False):
     """
-    yeast 数据中，"NUC"作为负样本，其余全做正样本，已打乱
+    按指定标签读取文件里的数据，正类为1，负类为0
 
-    :return: 整理好的数据，类似 MNIST
+    :param neg_no: 负标签下标
+    :param pos_no: 正标签下标
+    :param file_name:文件名
+    :param shuffle: 是否随机打乱
+    :return:打包好的数据
+
+    Notes
+    -----
+    返回的数据类似 MNIST 数据格式。x 中既包含了正样本，也包含了负样本。y 就是对应的标签.
+
+
+
+    Examples
+    --------
+    > x, y = get_data([1], [-1],  "yeast.dat")
+    表示读取 yeast.dat 文件，其中标签数组中下标为1的标签作为负样本标签，
+    -1表示剩余全部标签作为正样本标签.
+    yeast.dat 文件里标签有这些：[MIT, NUC, CYT, ME1, ME2, ME3, EXC, VAC, POX, ERL]
+    具体有哪些标签，需要自己打开数据文件查看，文件里面的 @attribute Class 属性就明确地
+    写出了有哪些标签.
+
+
+    > x, y = get_data([1], [0],  "yeast.dat")
+    表示读取 yeast.dat 文件，NUC 标签样本作为负样本，MIT 标签样本作为正样本.
     """
-    label = ("MIT", "NUC", "CYT", "ME1", "ME2", "ME3", "EXC", "VAC", "POX", "ERL")
-    neg_label = label[1]                # 负样本标签
-    file_dir = root_dir + "/yeast.dat"  # 文件路径
+    # 将负样本标签下标转 List (针对只给了一个数字的情况)
+    if type(neg_no) is not list:
+        neg_no = [neg_no]
+
+    # -1 表示取除了负标签以外的全部标签作为正标签
+    if pos_no == -1:
+        pass
+    elif type(pos_no) is not list:
+        pos_no = [pos_no]
+
+    # 读取数据
+    file_dir = root_dir + "/" + file_name  # 文件路径
     x_pos = []
     x_neg = []
+    neg_label = []
+    pos_label = []
     with open(file_dir) as file:
         line = file.readline()
         while line:
             # @ 开头的行都是一些描述行
             if line[0] == "@":
+                if line.find("{") != -1:
+                    s = line[line.find("{")+1:-2]
+                    s = s.replace(" ", "")
+                    all_label = s.split(",")
+
+                    if pos_no == -1:
+                        pos_no = []
+                        for i in range(len(all_label)):
+                            if i not in neg_no:
+                                pos_no.append(i)
+
+                    for i in range(len(all_label)):
+                        if i in neg_no:
+                            neg_label.append(all_label[i])
+                        if i in pos_no:
+                            pos_label.append(all_label[i])
                 pass
             else:
                 # 按逗号分割，去掉末尾的标签（标签占一个单词），提取数据
+                label = line.split(",")[-1].replace("\n", "").replace(" ", "")
                 t = line.split(",")[:-1]
                 t = [float(x) for x in t]
                 t = np.array(t)
 
                 # 如果该行包含负标签
-                if line.find(neg_label) != -1:
-                    # 添加到负样本列表中
-                    x_neg.append(t)
-                else:
+                if label in neg_label:
+                    x_neg.append(t) # 添加到负样本列表中
+                elif label in pos_label:
                     x_pos.append(t)
             line = file.readline()
-    # 计算不平衡率：正（多）/负（少）
-    IR = len(x_pos) / len(x_neg)
-    # 计算总样本数
-    e = len(x_pos) + len(x_neg)
-    # 合并正负样本
-    x = np.array(x_pos + x_neg)
-    # 生成对应样本的二分类标签
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
+
+    IR = len(x_pos) / len(x_neg)    # 计算不平衡率：正（多）/负（少）
+    e = len(x_pos) + len(x_neg)     # 计算总样本数
+    x = np.array(x_pos + x_neg)     # 合并正负样本
+    y_pos = np.ones((len(x_pos),), dtype=np.uint8)  # 生成对应样本的二分类标签
     y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
     y = np.concatenate((y_pos, y_neg))
 
-    x, y = shuffle_data(x, y)
+    # 打印输出样本详细信息
+    print("%s label=%d m=%d IR=%.2f pos=%d neg=%d e=%d" % (file_name, len(all_label), len(x[0]), IR, len(x_pos), len(x_neg), e))
+    print("neg_no", neg_no)
+    print("pos_no", pos_no)
 
-    return x, y
-
-
-def yeast_7_vs_1():
-    label = ("MIT", "NUC", "CYT", "ME1", "ME2", "ME3", "EXC", "VAC", "POX", "ERL")
-    pos_label = label[7]
-    neg_label = label[1]
-    file_dir = root_dir + "/yeast.dat"
-    x_pos = []
-    x_neg = []
-
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
+    # 打印样本简报
+    dataset_name = file_name.split(".")[0]
+    for k in neg_no:
+        dataset_name += "-" + str(k)
+    if len(pos_no) != len(all_label) - len(neg_no):
+        dataset_name += " vs. "
+        for i, k in enumerate(pos_no):
+            if i == 0:
+                dataset_name += str(k)
             else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
+                dataset_name += "-" + str(k)
+    print("%s\t%.2f\t%d\t%d" % (dataset_name, IR, e, len(x[0])))
 
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                elif line.find(neg_label) != -1:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
+    # 是否随机打乱
+    if shuffle:
+        x, y = shuffle_data(x, y)
 
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
+    # 转为数组
+    x = np.array(x)
+    y = np.array(y)
 
     return x, y
 
-
-def yeast6():
-    label = ("MIT", "NUC", "CYT", "ME1", "ME2", "ME3", "EXC", "VAC", "POX", "ERL")
-    pos_label = label[6]
-    file_dir = root_dir + "/yeast.dat"
-    x_pos = []
-    x_neg = []
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def yeast4():
-    label = ("MIT", "NUC", "CYT", "ME1", "ME2", "ME3", "EXC", "VAC", "POX", "ERL")
-    pos_label = label[4]
-    file_dir = root_dir + "/yeast.dat"
-    x_pos = []
-    x_neg = []
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def yeast_7_vs_1_4_5_8():
-    label = ("MIT", "NUC", "CYT", "ME1", "ME2", "ME3", "EXC", "VAC", "POX", "ERL")
-    pos_label = label[7]
-    neg_label = (label[1], label[4], label[5], label[8])
-    file_dir = root_dir + "/yeast.dat"
-    x_pos = []
-    x_neg = []
-
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 按逗号分割，去掉末尾的标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                if line.find(pos_label) != -1:
-                    x_pos.append(t)
-                # 因为最有有个 \n，所以是 -4
-                elif line[-4:-1] in neg_label:
-                    x_neg.append(t)
-            line = file.readline()
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-def thoraric_surgery():
-    file_dir = root_dir + "/thoraric-surgery.arff"
-
-    x_pos = []
-    x_neg = []
-
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 提取标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                label = line.split(",")[-1]
-                label = label.replace(" ", "")
-                label = label.replace("\n", "")
-
-                if label == "positive":
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-
-
-
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("IR=%.2f e=%d" % (IR, e))
-
-    return x, y
-
-def fertility():
-    file_dir = root_dir + "/fertility_Diagnosis.txt"
-
-    x_pos = []
-    x_neg = []
-
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-
-            # 提取标签
-            t = line.split(",")[:-1]
-            t = [float(x) for x in t]
-            t = np.array(t)
-
-            label = line.split(",")[-1]
-            label = label.replace(" ", "")
-            label = label.replace("\n", "")
-
-            if label == "N":
-                x_pos.append(t)
-            else:
-                x_neg.append(t)
-
-            line = file.readline()
-
-    # IR = len(x_neg) / len(x_pos)
-    IR = len(x_pos) / len(x_neg)
-
-    e = len(x_pos) + len(x_neg)
-
-
-
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("IR=%.2f e=%d" % (IR, e))
-
-    return x, y
-
-def haberman():
-    file_dir = root_dir + "/haberman.dat"
-
-    x_pos = []
-    x_neg = []
-
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 提取标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                label = line.split(",")[-1]
-                label = label.replace(" ", "")
-                label = label.replace("\n", "")
-
-                if label == "positive":
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
-
-
-def page_blocks0():
-    # TODO 这个还没改
-    file_dir = root_dir + "/page-blocks.dat"
-
-    x_pos = []
-    x_neg = []
-
-    with open(file_dir) as file:
-        line = file.readline()
-        while line:
-            if line[0] == "@":
-                pass
-            else:
-                # 提取标签
-                t = line.split(",")[:-1]
-                t = [float(x) for x in t]
-                t = np.array(t)
-
-                label = line.split(",")[-1]
-                label = label.replace(" ", "")
-                label = label.replace("\n", "")
-
-                if label == "0":
-                    x_pos.append(t)
-                else:
-                    x_neg.append(t)
-            line = file.readline()
-
-    IR = len(x_neg) / len(x_pos)
-    e = len(x_pos) + len(x_neg)
-    print("IR=%.2f e=%d" % (IR, e))
-    x = np.array(x_pos + x_neg)
-    y_pos = np.ones((len(x_pos),), dtype=np.uint8)
-    y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
-    y = np.concatenate((y_pos, y_neg))
-
-    print("x.shape", x.shape)
-    print(x)
-    print("y.shape", y.shape)
-    print(y)
-
-    return x, y
 
 if __name__ == '__main__':
-    x, y = yeast1()
+    # 读取数据
+    get_data([8], [6],  "winequality-red.dat")
+
+
+
+
