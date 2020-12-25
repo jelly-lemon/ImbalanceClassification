@@ -8,6 +8,12 @@ class PSOEvolutor:
     """
 
     def __init__(self, S, R, Q):
+        """
+
+        :param S:样本相似度矩阵
+        :param R:样本聚类结果矩阵
+        :param Q:各个分类器对聚类质心的分类结果
+        """
         self.S = S
         self.R = R
         self.Q = Q
@@ -26,7 +32,7 @@ class PSOEvolutor:
 
         # 评估每个粒子并得到全局最优
         pBest = X  # 存放每个粒子的历史最优位置，默认初始位置为最优位置
-        gBest = self.get_best(pBest)  # 获取这一届总体最优位置
+        gBest = self.get_gBest(pBest)  # 获取这一届总体最优位置
 
         # 随机初始化每一个粒子的速度
         v = np.random.rand(dim[0], dim[1])
@@ -37,7 +43,8 @@ class PSOEvolutor:
             print("\r%d/%d" % (iter, max_steps), end="")
 
             # 计算本次迭代惯性因子
-            cur_weight = (init_weight - end_weight) * (max_steps - iter) / max_steps + end_weight
+            cur_weight = init_weight - (iter - 1) * (init_weight - end_weight)  / (max_steps-1)
+
 
             # 生成两个随机数，分别代表飞向当前粒子历史最佳位置、全局历史最佳位置的程度
             r1 = np.random.rand(dim[0], dim[1])
@@ -57,12 +64,13 @@ class PSOEvolutor:
             X[X < 0] = 0
 
             # 新位置不一定是好位置，还得和之前的个体粒子最优位置进行比较，比之前好才能更新
-            pBest = self.compare(pBest, X)
-            gBest = self.get_best(pBest)
+            pBest = self.get_pBest(pBest, X)
+            gBest = self.get_gBest(pBest)
         print("")
+        print("进化后：")
         return X
 
-    def get_best(self, X):
+    def get_gBest(self, X):
         """
         从历届最优个体位置中选择一个最好的
 
@@ -72,54 +80,41 @@ class PSOEvolutor:
         values1 = [objection_1(self.S, xi) for xi in X]
         values2 = [objection_2(len(self.Q[0]), self.R, X[i], self.Q[i]) for i in range(len(X))]
 
-        S = [[] for i in range(0, len(values1))]
-        front = [[]]
-        n = [0 for i in range(0, len(values1))]
-        rank = [0 for i in range(0, len(values1))]
 
-        for p in range(0, len(values1)):
-            S[p] = []
-            n[p] = 0
-            for q in range(0, len(values1)):
-                if (values1[p] > values1[q] and values2[p] > values2[q]) or (
-                        values1[p] >= values1[q] and values2[p] > values2[q]) or (
-                        values1[p] > values1[q] and values2[p] >= values2[q]):
-                    if q not in S[p]:
-                        S[p].append(q)
-                elif (values1[q] > values1[p] and values2[q] > values2[p]) or (
-                        values1[q] >= values1[p] and values2[q] > values2[p]) or (
-                        values1[q] > values1[p] and values2[q] >= values2[p]):
-                    n[p] = n[p] + 1
-            if n[p] == 0:
-                rank[p] = 0
-                if p not in front[0]:
-                    front[0].append(p)
+        # 找帕累托最优前沿
+        # 找到不受支配的点，所有不受支配的点，就是帕累托最优前沿
+        # 不受支配的点：找不到两个函数值都比这个点小的点，那这个点就是不受支配的点
+        best_front = []
+        for i in range(len(values1)):
+            is_found = False
+            for j in range(len(values1)):
+                if i == j:
+                    continue
+                else:
+                    if values1[j] < values1[i] and values2[j] < values2[i]:
+                        # 找到支配 i 的点
+                        is_found = True
+                        break
+            if is_found is False:
+                best_front.append(i)
 
-        i = 0
-        while (front[i] != []):
-            Q = []
-            for p in front[i]:
-                for q in S[p]:
-                    n[q] = n[q] - 1
-                    if (n[q] == 0):
-                        rank[q] = i + 1
-                        if q not in Q:
-                            Q.append(q)
-            i = i + 1
-            front.append(Q)
+        # 计算最优前沿中哪个点函数值之和最小
+        i_min = 0
+        sum = values1[best_front[i_min]] + values2[best_front[i_min]]
+        for i in range(1, len(best_front)):
+            if values1[i] + values2[i] < sum:
+                i_min = i
+                sum = values1[i] + values2[i]
 
-        del front[len(front) - 1]
+        return X[best_front[i_min]]
 
-
-        return X[front[0][0]]
-
-    def compare(self, old_pos, new_pos):
+    def get_pBest(self, old_pos, new_pos):
         """
         比较新旧位置，返回最好位置
 
-        :param old_pos: 粒子历史最优位置
+        :param old_pos: 所有粒子历史最优位置
         :param new_pos: 新位置
-        :return: 新的历史最优位置
+        :return: 所有粒子的新的历史最优位置
         """
         pBest = []
         for i in range(len(old_pos)):
@@ -138,40 +133,18 @@ class PSOEvolutor:
         :return:位置好的粒子
         """
         x1_fun_value = [objection_1(self.S, x1), objection_2(len(self.Q[0]), self.R, x1, q)]
-        x2_fun_value = [objection_1(self.S, x2), objection_2(len(self.Q[0]), self.R, x1, q)]
+        x2_fun_value = [objection_1(self.S, x2), objection_2(len(self.Q[0]), self.R, x2, q)]
 
-        # 判定x1是不是最优解
-        for i in range(len(x1_fun_value)):
-            if x1_fun_value[i] < x2_fun_value[i]:
-                continue
-            else:
-                break
-        if i == len(x1_fun_value):
+        # 如果 x1 支配 x2，则返回 x1
+        if x1_fun_value[0] < x2_fun_value [0] and x1_fun_value[1] < x2_fun_value[1]:
             return x1
 
-        # 判定 x2 是不是最优解
-        for i in range(len(x2_fun_value)):
-            if x2_fun_value[i] < x1_fun_value[i]:
-                continue
-            else:
-                break
-        if i == len(x2_fun_value):
+        # 如果 x2 支配 x1，则返回 x2
+        if x1_fun_value[0] > x2_fun_value[0] and x1_fun_value[1] > x2_fun_value[1]:
             return x2
 
-        # 如果两者不相上下，该如何取舍呢？
-        if x1_fun_value[0] < x2_fun_value[0]:
+        # 如果两者非支配关系，选一个总和最小的返回
+        if x1_fun_value[0] + x1_fun_value[1] < x2_fun_value[0] + x2_fun_value[1]:
             return x1
         else:
             return x2
-
-
-
-
-
-
-
-
-
-
-
-

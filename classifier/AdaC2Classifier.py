@@ -1,29 +1,42 @@
 import numpy as np
 from sklearn import metrics
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-from read_data import get_data, shuffle_data
+from other.read_data import get_data, shuffle_data
 
 
 class AdaC2Classifier:
+    """
+    代价敏感分类器
+
+    """
+
     def __init__(self, T, C):
+        """
+
+        :param T: 迭代次数
+        :param C: 代价项字典
+        """
         self.T = T  # 总迭代次数
         self.C = C
-        self.all_h = [] # 所有基分类器
+        self.all_h = []  # 所有基分类器
         self.all_alpha = [-1 for i in range(T)]  # 所有 α
 
     def fit(self, X, Y):
+        """
+        训练模型
+
+        :param X: 样本
+        :param Y: 标签
+        """
         C = self.C
 
         M = len(Y)
         # 初始化样本权重
-        D = [1/M for j in range(M)]
-
+        D = [1 / M for j in range(M)]
 
         # 开始迭代
         for t in range(self.T):
-
             # 训练基分类器
             clf = DecisionTreeClassifier(class_weight=C)
             clf.fit(X, Y, sample_weight=D)
@@ -38,10 +51,20 @@ class AdaC2Classifier:
             Z = self.get_normalization_factor(D, C, alpha, Y, y_pred)
 
             # 更新权重
-            D = self.get_new_weights(D, C, alpha, Y, y_pred, Z)   # 更新权重
-
+            D = self.get_new_weights(D, C, alpha, Y, y_pred, Z)  # 更新权重
 
     def get_new_weights(self, D, C, alpha, Y, y_pred, Z):
+        """
+        更新权重
+
+        :param D: 老权重
+        :param C: 代价项
+        :param alpha:
+        :param Y: 标签
+        :param y_pred:老预测标签
+        :param Z: 归一化因子
+        :return:
+        """
         M = len(Y)
 
         # 新的权重
@@ -56,12 +79,16 @@ class AdaC2Classifier:
             else:
                 h = 1
 
-            new_D[i] = C[Y[i]] * D[i] * np.exp(-alpha*y*h) / Z
+            new_D[i] = C[Y[i]] * D[i] * np.exp(-alpha * y * h) / Z
 
         return new_D
 
-
     def predict(self, X):
+        """
+        预测样本
+        :param X:样本
+        :return: 标签
+        """
         all_y_pred = []
         for i in range(self.T):
             y_pred = self.all_h[i].predict(X)
@@ -84,9 +111,15 @@ class AdaC2Classifier:
 
         return Y
 
-
-
     def get_alpha(self, D, C, Y, y_pred):
+        """
+
+        :param D:
+        :param C:
+        :param Y:
+        :param y_pred:
+        :return:
+        """
         # 样本数量
         M = len(Y)
 
@@ -103,15 +136,20 @@ class AdaC2Classifier:
         if sum_down == 0:
             sum_down = 0.1
 
-        alpha = np.log(sum_up/sum_down)/2
+        alpha = np.log(sum_up / sum_down) / 2
 
         return alpha
 
-
-
-
-
     def get_normalization_factor(self, D, C, alpha, Y, y_pred):
+        """
+
+        :param D:
+        :param C:
+        :param alpha:
+        :param Y:
+        :param y_pred:
+        :return:
+        """
         # 样本数量
         M = len(Y)
 
@@ -126,12 +164,9 @@ class AdaC2Classifier:
             else:
                 h = 1
 
-            Z += C[Y[i]] * D[i] * np.exp(-alpha*y*h)
-
+            Z += C[Y[i]] * D[i] * np.exp(-alpha * y * h)
 
         return Z
-
-
 
 
 if __name__ == '__main__':

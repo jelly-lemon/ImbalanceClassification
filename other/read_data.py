@@ -4,8 +4,7 @@ import random
 import numpy as np
 
 
-# 数据根目录
-root_dir = "./data"
+
 
 
 def shuffle_data(x, y):
@@ -53,6 +52,9 @@ def get_data(neg_no, pos_no, file_name, shuffle = False):
     > x, y = get_data([1], [0],  "yeast.dat")
     表示读取 yeast.dat 文件，NUC 标签样本作为负样本，MIT 标签样本作为正样本.
     """
+    # 数据根目录
+    root_dir = "/0-0-pycharm/HybridClassifierEnsemble/data"
+
     # 将负样本标签下标转 List (针对只给了一个数字的情况)
     if type(neg_no) is not list:
         neg_no = [neg_no]
@@ -74,7 +76,7 @@ def get_data(neg_no, pos_no, file_name, shuffle = False):
         while line:
             # @ 开头的行都是一些描述行
             if line[0] == "@":
-                if line.find("{") != -1:
+                if line.find("Class") != -1 and line.find("{") != -1:
                     s = line[line.find("{")+1:-2]
                     s = s.replace(" ", "")
                     all_label = s.split(",")
@@ -107,6 +109,15 @@ def get_data(neg_no, pos_no, file_name, shuffle = False):
 
     IR = len(x_pos) / len(x_neg)    # 计算不平衡率：正（多）/负（少）
     e = len(x_pos) + len(x_neg)     # 计算总样本数
+
+    # 当数据太多了，只用其中一部分
+    x_neg_expected = 90
+    if len(x_neg) > x_neg_expected:
+        x_neg = random.sample(x_neg, x_neg_expected)
+    if int(len(x_neg) * IR) < len(x_pos):
+        x_pos = random.sample(x_pos, int(len(x_neg) * IR))
+
+    # 合并数据
     x = np.array(x_pos + x_neg)     # 合并正负样本
     y_pos = np.ones((len(x_pos),), dtype=np.uint8)  # 生成对应样本的二分类标签
     y_neg = np.zeros((len(x_neg),), dtype=np.uint8)
@@ -141,9 +152,11 @@ def get_data(neg_no, pos_no, file_name, shuffle = False):
     return x, y
 
 
+
 if __name__ == '__main__':
     # 读取数据
-    get_data([8], [6],  "winequality-red.dat")
+    get_data([0], -1,  "/大于2小于5/vehicle.dat")
+
 
 
 

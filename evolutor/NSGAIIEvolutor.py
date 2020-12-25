@@ -12,7 +12,7 @@ from equation import objection_1, objection_2
 
 class NSGAIIEvolutor():
     """
-    遗传算法 NSGA-II 的实现
+    遗传算法 NSGA-II 的实现，用来进化预测结果
 
     """
 
@@ -23,9 +23,8 @@ class NSGAIIEvolutor():
         :param max_gen:迭代次数
         :param solution:初始种群
         :param S:相似度矩阵
-        :param R: 聚类结果矩阵
-
-        :param all_q:
+        :param R:聚类结果矩阵
+        :param all_q:所有基分类器对聚类质心的分类结果
         """
         self.max_gen = max_gen
         self.pop_size = len(solution)

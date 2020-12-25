@@ -6,12 +6,13 @@ import numpy as np
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.neighbors import KNeighborsClassifier
-from read_data import shuffle_data
+from other.read_data import shuffle_data
 
 
 class HSBaggingClassifier():
     """
-    混合采样集成分类器
+    Hybrid Sampling Bagging Classifier
+    混合采样集成分类器. 该分类器自带各种上下采样器.
 
     """
 
@@ -44,7 +45,7 @@ class HSBaggingClassifier():
 
         # 创建基分类器
         self.classifier_ensemble = []
-        for i in range(number_sampler):
+        for i in range(int(number_sampler)):
             self.classifier_ensemble.append(KNeighborsClassifier())  # 使用 KNN 作为基分类器
 
         # 保存每个分类器的预测结果
@@ -100,7 +101,7 @@ class HSBaggingClassifier():
             self.classifier_ensemble[i].fit(x_train, y_train)
 
         start = end
-        end = self.n_random_sampler + self.n_down_sampler + self.n_up_sampler
+        end = self.n_random_sampler + self.n_down_sampler + self.n_up_sampler + self.n_no_sampler
         for i in range(start, end):
             # 不采样
             x_train, y_train = shuffle_data(x, y)  # 打乱数据集
@@ -121,4 +122,4 @@ class HSBaggingClassifier():
 
         y_proba = np.mean(self.all_U, axis=0)
 
-        return self.all_U, y_proba
+        return y_proba

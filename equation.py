@@ -24,7 +24,7 @@ def objection_2(n_cluster_center, R, U, Q):
     """
     目标函数 2
 
-    :param n_cluster_center:聚类器质心数量
+    :param n_cluster_center:聚类质心数量
     :param R:所有样本聚类结果矩阵
     :param U:某个分类器预测结果概率矩阵
     :param Q:某个分类器对聚类质心的分类结果
@@ -59,7 +59,7 @@ def sim(i, j):
 
 def get_S_matrix(x):
     """
-    计算相似度
+    计算相似度矩阵
 
     例如：
     样本的预测结果（属于类别0的概率，属于类别1的概率）：
@@ -67,12 +67,12 @@ def get_S_matrix(x):
      [0.4 0.6]
      [0.  1. ]]
 
-    得到相似度矩阵：
+    得到相似度矩阵 3x3：
     [[1.         0.32259073 0.10406478]
      [0.32259073 1.         0.32259073]
      [0.10406478 0.32259073 1.]]
 
-    :param x:预测结果分数
+    :param x:预测结果概率
     :return: 相似度矩阵
     """
     mat = np.zeros((len(x), len(x)))
