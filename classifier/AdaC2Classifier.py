@@ -2,7 +2,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
 
-from other.read_data import get_data, shuffle_data
+from data.read_data import get_data, shuffle_data
 
 
 class AdaC2Classifier:

@@ -1,6 +1,6 @@
 from classifier.DBUBaggingClassifier3 import DBUBaggingClassifier3
 from other.metrics import gmean
-from other.read_data import get_data
+from data.read_data import get_data
 import numpy as np
 from sklearn import metrics
 from sklearn.model_selection import KFold

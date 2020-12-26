@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/HybridClassifierEnsemble.iml" filepath="$PROJECT_DIR$/.idea/HybridClassifierEnsemble.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ImbalanceClassification.iml" filepath="$PROJECT_DIR$/.idea/ImbalanceClassification.iml" />
     </modules>
   </component>
 </project>

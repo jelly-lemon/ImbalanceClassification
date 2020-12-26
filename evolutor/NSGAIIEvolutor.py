@@ -9,7 +9,6 @@ import numpy as np
 from equation import objection_1, objection_2
 
 
-
 class NSGAIIEvolutor():
     """
     遗传算法 NSGA-II 的实现，用来进化预测结果
@@ -153,7 +152,6 @@ class NSGAIIEvolutor():
 
         return child
 
-
     def index_of(self, a, list):
         """
 
@@ -203,7 +201,7 @@ class NSGAIIEvolutor():
                                            non_dominated_sorted_solution2[i][:]))
 
             # 适者生存，得到新的种群，只保留 pop_size 个个体
-            new_solution = []   # 里面只存编号
+            new_solution = []  # 里面只存编号
             for i in range(0, len(non_dominated_sorted_solution2)):
                 non_dominated_sorted_solution2_1 = [
                     self.index_of(non_dominated_sorted_solution2[i][j], non_dominated_sorted_solution2[i]) for j in

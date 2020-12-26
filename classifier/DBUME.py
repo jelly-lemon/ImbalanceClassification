@@ -9,7 +9,7 @@ from sklearn.cluster import KMeans
 from sklearn.tree import DecisionTreeClassifier
 
 from equation import get_R_matrix, get_S_matrix
-from other.read_data import shuffle_data
+from data.read_data import shuffle_data
 
 
 class DBUME():

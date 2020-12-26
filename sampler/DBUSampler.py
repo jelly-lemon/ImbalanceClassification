@@ -1,5 +1,9 @@
 # 描述：基于密度的下采样器
 # 作者：Jelly Lemon
+#
+# #碎碎念#
+# 当采样率比较高时，比如为原数据集的80%，那么完成整个下采样就非常耗时。
+# 后面的样本很难采集到，因为是随机生成一个数再来判断在不在采样区间嘛。
 
 import random
 import numpy as np
@@ -88,8 +92,6 @@ class DBUSampler:
         self.N_pos = len(self.T_p)  # 正样本数量
         self.N_neg = len(self.T_n)  # 负样本数量
 
-
-
         # 初始化相关变量
         self.delt_star = None  # 累计密度因子
         self.all_Ri = [[] for i in range(self.N_pos)]  # 采样间隔范围
@@ -125,7 +127,7 @@ class DBUSampler:
         print("\r开始采样（采样率%.2f）..." % self.sampling_rate)
         count = 0  # 当前采样个数
         T_p_new = []  # 存放采样样本的集合
-        while count < int(self.N_pos * self.sampling_rate): # 下采样数量=正样本数量*采样率
+        while count < int(self.N_pos * self.sampling_rate):  # 下采样数量=正样本数量*采样率
             # 随机生成 [0,1] 的一个数
             r = random.uniform(0, 1)
             # print("r=%f" % r)

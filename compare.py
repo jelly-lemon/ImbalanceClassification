@@ -5,9 +5,8 @@ from classifier.DBUBaggingClassifier import DBUBaggingClassifier
 from classifier.DBUBaggingClassifier2 import DBUBaggingClassifier2
 from classifier.DBUBaggingClassifier3 import DBUBaggingClassifier3
 from classifier.DBUBaggingClassifier4 import DBUBaggingClassifier4
-from evolutor.PSOEvolutor3 import PSOEvolutor3
 from other.metrics import gmean
-from other.read_data import get_data
+from data.read_data import get_data
 import numpy as np
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler

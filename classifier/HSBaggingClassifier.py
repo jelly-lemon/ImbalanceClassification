@@ -6,7 +6,7 @@ import numpy as np
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.neighbors import KNeighborsClassifier
-from other.read_data import shuffle_data
+from data.read_data import shuffle_data
 
 
 class HSBaggingClassifier():
