@@ -1,10 +1,6 @@
-import random
+# 描述：仅仅用来运行常见算法
 
-from classifier.AdaC2Classifier import AdaC2Classifier
-from classifier.DBUBaggingClassifier import DBUBaggingClassifier
-from classifier.DBUBaggingClassifier2 import DBUBaggingClassifier2
-from classifier.DBUBaggingClassifier3 import DBUBaggingClassifier3
-from classifier.DBUBaggingClassifier4 import DBUBaggingClassifier4
+import random
 from other.metrics import gmean
 from data.read_data import get_data
 import numpy as np
@@ -56,7 +52,7 @@ def kFoldTest(x, y, sampler, classifier, k=10):
     :param classifier:分类器
     :param k:交叉验证折数
     """
-    print("\n--------------------------------------------------")
+    print("-"*60)
     print("%s-%s" % (sampler, classifier))
 
     # 记录评估结果
@@ -72,26 +68,12 @@ def kFoldTest(x, y, sampler, classifier, k=10):
     kf = KFold(n_splits=k, shuffle=True)  # 混洗数据
     cur_k = 0
     for train_index, val_index in kf.split(x, y):
-
-
         # 划分数据
         cur_k += 1  # 当前第几折次交叉验证
         x_train, y_train = x[train_index], y[train_index]
         x_val, y_val = x[val_index], y[val_index]
         print("k = %d" % cur_k)
         print("训练 正样本：%d 负样本：%d" % (len(y_train[y_train == 1]), len(y_train[y_train == 0])))
-
-        # 优化基分类器的比例
-        # t = PSOEvolutor3(x_train, y_train, x_val, y_val).evolve(100)
-        # print(t)
-        # continue
-
-
-        # 使其平衡
-        # x_val, y_val = get_balance(x_val, y_val)
-
-
-
 
         # 采样器
         if sampler == "DBU":
@@ -116,32 +98,13 @@ def kFoldTest(x, y, sampler, classifier, k=10):
             clf = EasyEnsembleClassifier(base_estimator=KNeighborsClassifier(), n_estimators=15)
         elif classifier == "BalancedBaggingClassifier":
             clf = BalancedBaggingClassifier(base_estimator=KNeighborsClassifier(), n_estimators=15)
-        elif classifier == "AdaC2":
-            # 代价项
-            C = {1: 0.1, 0: 1}
-            clf = AdaC2Classifier(20, C)
-        elif classifier == "DBUBaggingClassifier":
-            clf = DBUBaggingClassifier(10)
-        elif classifier == "DBUBaggingClassifier2":
-            clf = DBUBaggingClassifier2(10, 3)
-        elif classifier == "DBUBaggingClassifier3":
-            clf = DBUBaggingClassifier3(15, 0.1)
-        elif classifier == "DBUBaggingClassifier4":
-            clf = DBUBaggingClassifier4(10)
-
-
 
         # 训练
         clf.fit(x_train, y_train)
 
         # 测试
         print("测试 正样本：%d 负样本：%d" % (len(y_val[y_val == 1]), len(y_val[y_val == 0])))
-        if classifier == "DBUBaggingClassifier3":
-            y_proba = clf.predict_proba(x_val, y_val=y_val)
-        elif classifier == "DBUBaggingClassifier4":
-            y_proba = clf.predict_proba(x_val, y_val=y_val)
-        else:
-            y_proba = clf.predict_proba(x_val)
+        y_proba = clf.predict_proba(x_val)
         y_pred = np.argmax(y_proba, axis=1)
 
         # 评估测试集
@@ -167,18 +130,33 @@ def kFoldTest(x, y, sampler, classifier, k=10):
               (val_acc, val_precision, val_recall, val_f1, auc_value, val_gmean))
 
     # 统计，求平均值和标准差
-    print("%s-%s" % (sampler, classifier))
-    for k in val_history.keys():
-        # print("%.4f" % (np.mean(val_history[k])))
-        print("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
-    print("auc:")
-    for value in val_history['auc_value']:
-        print("%.2f," % value, end="")
-    print("")
+    # print("%s-%s" % (sampler, classifier))
+    # for k in val_history.keys():
+    #     # print("%.4f" % (np.mean(val_history[k])))
+    #     print("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
+    # print("-" * 60)
+
+    return val_history
+
+
 
 
 if __name__ == '__main__':
     # 获取原始数据
-    x, y = get_data([0], -1,  "vehicle.dat")
+    x, y = get_data([0,6], -1,  "1到5/yeast.dat")
 
-    kFoldTest(x, y, "NO", "DBUBaggingClassifier3", k=6)
+
+    history = None
+    for i in range(10):
+        val_history = kFoldTest(x, y, "SMOTE", "DT", k=2)
+        if history is None:
+            history = val_history
+        else:
+            for k in val_history.keys():
+                history[k] += val_history[k]
+    val_history = history
+    print("-" * 60)
+    for k in val_history.keys():
+        print("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
+    print("-" * 60)
+
