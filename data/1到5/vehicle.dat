@@ -19,7 +19,7 @@
 @attribute Hollows_ratio integer [181, 211]
 @attribute Class {van, saab, bus, opel}
 @inputs Compactness, Circularity, Distance_circularity, Radius_ratio, Praxis_aspect_ratio, Max_length_aspect_ratio, Scatter_ratio, Elongatedness, Praxis_rectangular, Length_rectangular, Major_variance, Minor_variance, Gyration_radius, Major_skewness, Minor_skewness, Minor_kurtosis, Major_kurtosis, Hollows_ratio
-@outputs Class
+@outputs C1ass
 @data
 95, 48, 83, 178, 72, 10, 162, 42, 20, 159, 176, 379, 184, 70, 6, 16, 187, 197, van 
 91, 41, 84, 141, 57, 9, 149, 45, 19, 143, 170, 330, 158, 72, 9, 14, 189, 199, van 

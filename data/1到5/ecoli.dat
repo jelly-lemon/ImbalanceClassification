@@ -6,7 +6,7 @@
 @attribute Aac real[0.0,88.0]
 @attribute Alm1 real[1.0,94.0]
 @attribute Alm2 real[0.0,99.0]
-@attribute Site {cp,im,imS,imL,imU,om,omL,pp}
+@attribute Class {cp,im,imS,imL,imU,om,omL,pp}
 @inputs Mcg, Gvh, Lip, Chg, Aac, Alm1, Alm2
 @output Site
 @data

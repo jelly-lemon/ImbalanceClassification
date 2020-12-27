@@ -89,7 +89,7 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         elif classifier == "DT":
             clf = DecisionTreeClassifier()
         elif classifier == "RandomForestClassifier":
-            clf = RandomForestClassifier(n_estimators=15, max_features=np.sqrt(len(x_train[0])), criterion="gini")
+            clf = RandomForestClassifier(n_estimators=15)
         elif classifier == "BaggingClassifier":
             clf = BaggingClassifier(base_estimator=KNeighborsClassifier(), n_estimators=15, bootstrap=True)
         elif classifier == "AdaBoostClassifier":
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     history = None
     for i in range(10):
-        val_history = kFoldTest(x, y, "SMOTE", "DT", k=2)
+        val_history = kFoldTest(x, y, "NO", "EasyEnsembleClassifier", k=2)
         if history is None:
             history = val_history
         else:

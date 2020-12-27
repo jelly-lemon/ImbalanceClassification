@@ -1,3 +1,6 @@
+# 来源：https://tangshusen.me/2018/11/18/adaboost/
+# 文章里面有关于 AdaBoost 的详细解释
+
 import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.tree import DecisionTreeClassifier
@@ -42,6 +45,7 @@ def my_adaboost_clf(Y_train, X_train, Y_test, X_test, M=20, weak_clf=DecisionTre
 
     print("My AdaBoost clf train accuracy: %.4f" % (sum(pred_train == Y_train) / n_train))
     print("My AdaBoost clf test accuracy: %.4f" % (sum(pred_test == Y_test) / n_test))
+
 
 if __name__ == '__main__':
     x, y = get_data([1], -1, "/可调节/movement_libras.dat")

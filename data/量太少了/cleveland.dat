@@ -12,7 +12,7 @@
 @attribute Slope real [1.0, 3.0]
 @attribute Ca real [0.0, 3.0]
 @attribute Thal real [3.0, 7.0]
-@attribute Num {0,1,2,3,4}
+@attribute Class {0,1,2,3,4}
 @inputs Age, Sex, Cp, Trestbps, Chol, Fbs, Restecg, Thalach, Exang, Oldpeak, Slope, Ca, Thal
 @outputs Num
 @data
