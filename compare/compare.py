@@ -1,6 +1,9 @@
 # 描述：仅仅用来运行常见算法
 
 import random
+
+from classifier.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
+from classifier.HSBaggingClassifier import HSBaggingClassifier
 from other.metrics import gmean
 from data.read_data import get_data
 import numpy as np
@@ -74,6 +77,8 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         x_val, y_val = x[val_index], y[val_index]
         print("k = %d" % cur_k)
         print("训练 正样本：%d 负样本：%d" % (len(y_train[y_train == 1]), len(y_train[y_train == 0])))
+        IR = len(y_train[y_train == 1]) / len(y_train[y_train == 0])
+        print("IR = %.2f" % IR)
 
         # 采样器
         if sampler == "DBU":
@@ -98,6 +103,8 @@ def kFoldTest(x, y, sampler, classifier, k=10):
             clf = EasyEnsembleClassifier(base_estimator=KNeighborsClassifier(), n_estimators=15)
         elif classifier == "BalancedBaggingClassifier":
             clf = BalancedBaggingClassifier(base_estimator=KNeighborsClassifier(), n_estimators=15)
+        elif classifier == "AdaSamplingBaggingClassifier":
+            clf = AdaSamplingBaggingClassifier(15)
 
         # 训练
         clf.fit(x_train, y_train)
@@ -148,7 +155,7 @@ if __name__ == '__main__':
 
     history = None
     for i in range(10):
-        val_history = kFoldTest(x, y, "NO", "EasyEnsembleClassifier", k=2)
+        val_history = kFoldTest(x, y, "NO", "AdaSamplingBaggingClassifier", k=2)
         if history is None:
             history = val_history
         else:
