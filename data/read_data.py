@@ -153,4 +153,4 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
 
 if __name__ == '__main__':
     # 读取数据
-    get_data([2], -1, "/1到5/glass.dat")
+    get_data([8], [6,7], "25到30/winequality-red.dat")

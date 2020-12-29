@@ -2,6 +2,7 @@
 
 import random
 
+from classifier.AdaC2Classifier import AdaC2Classifier
 from classifier.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
 from classifier.HSBaggingClassifier import HSBaggingClassifier
 from other.metrics import gmean
@@ -106,6 +107,7 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         elif classifier == "AdaSamplingBaggingClassifier":
             clf = AdaSamplingBaggingClassifier(15)
 
+
         # 训练
         clf.fit(x_train, y_train)
 
@@ -150,12 +152,12 @@ def kFoldTest(x, y, sampler, classifier, k=10):
 
 if __name__ == '__main__':
     # 获取原始数据
-    x, y = get_data([0,6], -1,  "1到5/yeast.dat")
+    x, y = get_data([8], -1,  "25到30/winequality-red.dat")
 
 
     history = None
     for i in range(10):
-        val_history = kFoldTest(x, y, "NO", "AdaSamplingBaggingClassifier", k=2)
+        val_history = kFoldTest(x, y, "NO", "EasyEnsembleClassifier", k=2)
         if history is None:
             history = val_history
         else:

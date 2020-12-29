@@ -3,12 +3,13 @@ from equation import objection_1, objection_2
 
 class PSOEvolutor:
     """
-    粒子群优化算法
+    粒子群优化算法，根据两个目标函数优化预测结果
 
     """
 
     def __init__(self, S, R, Q):
         """
+        初始化粒子群优化器
 
         :param S:样本相似度矩阵
         :param R:样本聚类结果矩阵
@@ -20,8 +21,10 @@ class PSOEvolutor:
 
     def evolve(self, X, max_steps):
         """
+        开始进化
 
         :param X:初始粒子位置
+        :return 进化后的粒子位置
         """
         max_steps = max_steps  # 最大迭代次数
 
@@ -40,11 +43,10 @@ class PSOEvolutor:
         iter = 0
         for step in range(max_steps):
             iter += 1
-            print("\r%d/%d" % (iter, max_steps), end="")
+            print("\r进化进度 %d/%d" % (iter, max_steps), end="")
 
             # 计算本次迭代惯性因子
             cur_weight = init_weight - (iter - 1) * (init_weight - end_weight)  / (max_steps-1)
-
 
             # 生成两个随机数，分别代表飞向当前粒子历史最佳位置、全局历史最佳位置的程度
             r1 = np.random.rand(dim[0], dim[1])
@@ -56,18 +58,18 @@ class PSOEvolutor:
             pBest = np.array(pBest)
             gBest = np.array(gBest)
             v = cur_weight * v + c1 * r1 * (pBest - X) + c2 * r2 * (gBest - X)
-
-            X = X + v
+            X = X + v   # 粒子跑到新位置
 
             # 超出范围的粒子位置要进行限制
+            # 预测概率不可能大于1，也不可能小于0
             X[X > 1] = 1
             X[X < 0] = 0
 
             # 新位置不一定是好位置，还得和之前的个体粒子最优位置进行比较，比之前好才能更新
             pBest = self.get_pBest(pBest, X)
             gBest = self.get_gBest(pBest)
+
         print("")
-        print("进化后：")
         return X
 
     def get_gBest(self, X):
@@ -79,7 +81,6 @@ class PSOEvolutor:
         # 首先计算每个粒子对应的函数值
         values1 = [objection_1(self.S, xi) for xi in X]
         values2 = [objection_2(len(self.Q[0]), self.R, X[i], self.Q[i]) for i in range(len(X))]
-
 
         # 找帕累托最优前沿
         # 找到不受支配的点，所有不受支配的点，就是帕累托最优前沿

@@ -1,7 +1,8 @@
+# 描述：来自论文 Cost-Sensitive Boosting for Classification of Imbalanced Data, Yanmin Sun
+
 import numpy as np
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
-
 from data.read_data import get_data, shuffle_data
 
 
@@ -15,7 +16,7 @@ class AdaC2Classifier:
         """
 
         :param T: 迭代次数
-        :param C: 代价项字典
+        :param C: 代价项字典，如 {1: 0.1, 0: 1}，前面的 1 和 0 表示类别，后面的 0.1 和 1 表示分错样本付出的代价
         """
         self.T = T  # 总迭代次数
         self.C = C
@@ -86,6 +87,7 @@ class AdaC2Classifier:
     def predict(self, X):
         """
         预测样本
+
         :param X:样本
         :return: 标签
         """
@@ -113,12 +115,13 @@ class AdaC2Classifier:
 
     def get_alpha(self, D, C, Y, y_pred):
         """
+        计算阿尔法
 
-        :param D:
-        :param C:
-        :param Y:
-        :param y_pred:
-        :return:
+        :param D:权重
+        :param C:代价项
+        :param Y:真实标签
+        :param y_pred:预测标签
+        :return:阿尔法
         """
         # 样本数量
         M = len(Y)
@@ -128,9 +131,9 @@ class AdaC2Classifier:
         sum_down = 0  # 分母
         for i in range(M):
             if Y[i] == y_pred[i]:
-                sum_up += C[y[i]] * D[i]
+                sum_up += C[Y[i]] * D[i]
             else:
-                sum_down += C[y[i]] * D[i]
+                sum_down += C[Y[i]] * D[i]
 
         # 如果分母为0
         if sum_down == 0:
@@ -142,13 +145,14 @@ class AdaC2Classifier:
 
     def get_normalization_factor(self, D, C, alpha, Y, y_pred):
         """
+        计算归一化因子
 
-        :param D:
-        :param C:
+        :param D:样本权重
+        :param C:代价项
         :param alpha:
-        :param Y:
-        :param y_pred:
-        :return:
+        :param Y:真实标签
+        :param y_pred:预测标签
+        :return:归一化因子
         """
         # 样本数量
         M = len(Y)
@@ -170,7 +174,8 @@ class AdaC2Classifier:
 
 
 if __name__ == '__main__':
-    x, y = get_data([1], -1, "yeast.dat")
+    # 获取原始数据
+    x, y = get_data([0, 6], -1, "1到5/yeast.dat")
 
     x, y = shuffle_data(x, y)
     x = np.array(x)
@@ -186,7 +191,7 @@ if __name__ == '__main__':
     x_val = x[-100:]
     y_val = y[-100:]
 
-    clf = AdaC2Classifier(15, C)
+    clf = AdaC2Classifier(20, C)
     clf.fit(x_train, y_train)
     y_pred = clf.predict(x_val)
     print("预测结果：")
