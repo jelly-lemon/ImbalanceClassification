@@ -137,15 +137,23 @@ Balance-Cascade 用的是 BalancedBaggingClassifier
 # winequality-red-8 1581/18=87.83
 |  评价指标  | RUS-KNN         | RUS-DT         | SMOTE-KNN | SMOTE-DT |
 |  ----     | ----             | ----           |----       |----   |
-|f1score    |0.6962 ±0.1434|0.8092 ±0.0539|ValueError: Expected n_neighbors <= n_samples,  but n_samples = 5, n_neighbors = 6|ValueError: Expected n_neighbors <= n_samples,  but n_samples = 4, n_neighbors = 6|
-|auc        |0.5827 ±0.0612|0.7199 ±0.0840|||
-|gmean      |0.5586 ±0.0827|0.7139 ±0.0806|||
+|f1score    |0.6962 ±0.1434|0.8092 ±0.0539|0.9435 ±0.0124(k_neighbors=2)|0.9836 ±0.0035|
+|auc        |0.5827 ±0.0612|0.7199 ±0.0840|0.5710 ±0.0693|0.5615 ±0.0609|
+|gmean      |0.5586 ±0.0827|0.7139 ±0.0806|0.4257 ±0.1671|0.3068 ±0.2184|
 
-|  评价指标  | Random-Forest | Bagging-KNN    | Balance-Cascade  | Easy-Ensemble |
-|  ----     | ----          | ----           |----              |----           |
-|f1score    | 0.9944 ±0.0014| 0.9941 ±0.0014| ValueError: Expected n_neighbors <= n_samples,  but n_samples = 4, n_neighbors = 5| 0.7505 ±0.0733|
-|auc        | 0.6718 ±0.0965| 0.5729 ±0.0646| |0.5809 ±0.0721 |
-|gmean      | 0.1509 ±0.1682| 0.0000 ±0.0000| |0.5319 ±0.1390 |
+
+
+
+|  评价指标  | Random-Forest | Bagging-KNN    | Balance-Cascade  | Easy-Ensemble | AdaBoost|
+|  ----     | ----          | ----           |----              |----           |---|
+|f1score    | 0.9944 ±0.0014| 0.9941 ±0.0014 | ?| 0.7505 ±0.0733|0.9922 ±0.0019|
+|auc        | 0.6718 ±0.0965| 0.5729 ±0.0646 | |0.5809 ±0.0721 |0.7972 ±0.0568|
+|gmean      | 0.1509 ±0.1682| 0.0000 ±0.0000 | |0.5319 ±0.1390 |0.1903 ±0.1976|
+
+
+
+
+
 
 
 

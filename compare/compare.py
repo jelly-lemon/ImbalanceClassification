@@ -87,7 +87,7 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         elif sampler == "RUS":
             x_train, y_train = RandomUnderSampler(replacement=False).fit_resample(x_train, y_train)  # 抽样
         elif sampler == "SMOTE":
-            x_train, y_train = SMOTE(k_neighbors=5).fit_resample(x_train, y_train)
+            x_train, y_train = SMOTE(k_neighbors=2).fit_resample(x_train, y_train)
 
         # 分类器
         if classifier == "KNN":
@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
     history = None
     for i in range(10):
-        val_history = kFoldTest(x, y, "NO", "EasyEnsembleClassifier", k=2)
+        val_history = kFoldTest(x, y, "SMOTE", "DT", k=2)
         if history is None:
             history = val_history
         else:
