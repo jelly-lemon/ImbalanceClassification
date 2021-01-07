@@ -26,14 +26,14 @@ class AdaSamplingBaggingClassifier:
         :param y:标签
         """
         IR = len(y[y == 1]) / len(y[y == 0])
-        sampling_interval = 1/(IR*np.log2(IR))
+        sampling_interval = 1 / (IR * np.log2(IR))
         balance_rate = 1 / IR
-        balance_point = 5
-        start_rate = balance_rate - sampling_interval/balance_point
+        balance_point = 2
+        start_rate = balance_rate - sampling_interval / balance_point
         print("平衡采样率点位：1/%d" % balance_point)
         print("平衡采样率 %.4f 采样间隔 %.4f" % (balance_rate, sampling_interval))
         for i in range(self.n_estimator):
-            sampling_rate = start_rate + i*(sampling_interval/(self.n_estimator-1))
+            sampling_rate = start_rate + i * (sampling_interval / (self.n_estimator - 1))
             print("下采样率 %.4f 采样个数 %d" % (sampling_rate, int(sampling_rate * len(x))))
 
             # # 基于密度采样
@@ -50,9 +50,7 @@ class AdaSamplingBaggingClassifier:
                 else:
                     break
 
-
             self.classifiers[i].fit(x_train, y_train)
-
 
     def predict_proba(self, x):
         """

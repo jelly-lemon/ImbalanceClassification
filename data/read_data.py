@@ -20,6 +20,49 @@ def shuffle_data(x, y):
     return x, y
 
 
+def upsampling(x, y, target_number=90):
+    """
+    过采样，随机选中某些样本进行复制，然后添加到原数据集中
+
+    扩充过后，多数类/少数类比例不变
+
+    :param x:原数据集
+    :param y:原标签
+    :return:扩充后的数据集
+    """
+
+    # x, y = list(x), list(y)
+    x_neg = [x[i] for i in range(len(y)) if y[i] == 0]
+    x_pos = [x[i] for i in range(len(y)) if y[i] == 1]
+
+    if len(x_neg) >= target_number:
+        return np.array(x), np.array(y)
+
+    # 计算不平衡率
+    IR = len(x_pos) / len(x_neg)
+
+    # 为了保持不平衡率，正样本需要复制扩充多少
+    y1_add_number = int(IR * target_number - len(x_pos))
+    y0_need_number = target_number - len(x_neg)  # 需要复制多少个
+
+    # 不放回随机抽样
+    for i in range(y1_add_number):
+        t = random.sample(x_pos, 1).copy()
+        x_pos.append(t[0])
+
+    for i in range(y0_need_number):
+        t = random.sample(x_neg, 1).copy()
+        x_neg.append(t[0])
+
+    # 合并
+    x = np.concatenate((np.array(x_pos), np.array(x_neg)))
+    y = [1 for i in range(len(x_pos))] + [0 for i in range(len(x_neg))]
+
+    print("复制扩充后：%d/%d=%.2f" % (len(x_pos), len(x_neg), len(x_pos)/len(x_neg)))
+
+    return np.array(x), np.array(y)
+
+
 def get_data(neg_no, pos_no, file_name, shuffle=False):
     """
     按指定标签读取文件里的数据，正类为1，负类为0
@@ -90,6 +133,9 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
             else:
                 # 按逗号分割，去掉末尾的标签（标签占一个单词），提取数据
                 label = line.split(",")[-1].replace("\n", "").replace(" ", "")
+                # 如果标签末尾含有一个 "."，把它给删掉
+                if label[-1] == '.':
+                    label = label.replace(".", "")
                 t = line.split(",")[:-1]
                 t = [float(x) for x in t]
                 t = np.array(t)
@@ -104,12 +150,16 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
     IR = len(x_pos) / len(x_neg)  # 计算不平衡率：正（多）/负（少）
     e = len(x_pos) + len(x_neg)  # 计算总样本数
 
+    #
     # 当数据太多了，只用其中一部分
-    x_neg_expected = 90
-    if len(x_neg) > x_neg_expected:
-        x_neg = random.sample(x_neg, x_neg_expected)
-    if int(len(x_neg) * IR) < len(x_pos):
-        x_pos = random.sample(x_pos, int(len(x_neg) * IR))
+    #
+    # x_neg_expected = 90 # 期望负样本数量只有90个
+    # if len(x_neg) > x_neg_expected:
+    #     # 如果负样本数量超过了90个，就随机采样为90个
+    #     x_neg = random.sample(x_neg, x_neg_expected)
+    # # 保持不平衡比不变，正样本也进行随机采样
+    # if int(len(x_neg) * IR) < len(x_pos):
+    #     x_pos = random.sample(x_pos, int(len(x_neg) * IR))
 
     # 合并数据
     x = np.array(x_pos + x_neg)  # 合并正负样本
@@ -118,10 +168,10 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
     y = np.concatenate((y_pos, y_neg))
 
     # 打印输出样本详细信息
-    print("-"*60)
+    print("-" * 60)
     print("数据集简报")
     print("%s label=%d m=%d IR=%.2f pos=%d neg=%d e=%d" % (
-    file_name, len(all_label), len(x[0]), IR, len(x_pos), len(x_neg), e))
+        file_name, len(all_label), len(x[0]), IR, len(x_pos), len(x_neg), e))
     print("neg_no", neg_no)
     print("pos_no", pos_no)
 
@@ -137,7 +187,8 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
             else:
                 dataset_name += "-" + str(k)
     print("数据集\t类别数量\t属性数量\t不平衡比")
-    print("%s\t%d\t%d\t%d/%d=%.2f" % (dataset_name, len(pos_label)+len(neg_label), len(x[0]), len(x_pos), len(x_neg), IR))
+    print("%s\t%d\t%d\t%d/%d=%.2f" % (
+    dataset_name, len(pos_label) + len(neg_label), len(x[0]), len(x_pos), len(x_neg), IR))
     print("-" * 60)
 
     # 是否随机打乱
@@ -153,4 +204,9 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
 
 if __name__ == '__main__':
     # 读取数据
-    get_data([1], -1, "没用的/titanic.dat")
+    x, y = get_data([7], -1,  "20到25/isolet5.dat")
+
+    x, y = upsampling(x, y)
+
+    print(len(y[y == 0]))
+    print(len(y[y == 1]))

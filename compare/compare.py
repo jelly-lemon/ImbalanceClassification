@@ -6,7 +6,7 @@ from classifier.AdaC2Classifier import AdaC2Classifier
 from classifier.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
 from classifier.HSBaggingClassifier import HSBaggingClassifier
 from other.metrics import gmean
-from data.read_data import get_data
+from data.read_data import get_data, upsampling
 import numpy as np
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
@@ -152,12 +152,15 @@ def kFoldTest(x, y, sampler, classifier, k=10):
 
 if __name__ == '__main__':
     # 获取原始数据
-    x, y = get_data([8], -1,  "25到30/winequality-red.dat")
+    x, y = get_data([7], [1,4,5,8],  "1到5/yeast.dat")
+
+    x, y = upsampling(x, y, 90)
 
 
+    # 多次交叉验证
     history = None
     for i in range(10):
-        val_history = kFoldTest(x, y, "SMOTE", "DT", k=2)
+        val_history = kFoldTest(x, y, "NO", "AdaSamplingBaggingClassifier", k=2)
         if history is None:
             history = val_history
         else:
@@ -167,5 +170,8 @@ if __name__ == '__main__':
     print("-" * 60)
     for k in val_history.keys():
         print("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
+    for k in val_history.keys():
+        print(k)
+        print(val_history[k])
     print("-" * 60)
 
