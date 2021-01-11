@@ -28,7 +28,7 @@ class AdaSamplingBaggingClassifier:
         IR = len(y[y == 1]) / len(y[y == 0])
         sampling_interval = 1 / (IR * np.log2(IR))
         balance_rate = 1 / IR
-        balance_point = 4
+        balance_point = 5
         start_rate = balance_rate - sampling_interval / balance_point
         print("平衡采样率点位：1/%d" % balance_point)
         print("平衡采样率 %.4f 采样间隔 %.4f" % (balance_rate, sampling_interval))

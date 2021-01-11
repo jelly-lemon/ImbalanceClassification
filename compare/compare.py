@@ -152,7 +152,7 @@ def kFoldTest(x, y, sampler, classifier, k=10):
 
 if __name__ == '__main__':
     # 获取原始数据
-    x, y = get_data([4], -1,  "1到5/ecoli.dat")
+    x, y = get_data([3], -1,  "60到65/page-blocks.dat")
 
     x, y = upsampling(x, y, 90)
 
