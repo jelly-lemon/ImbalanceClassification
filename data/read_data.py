@@ -1,5 +1,7 @@
-# 描述：读取指定文件里面的数据
-
+"""
+读取指定文件里面的数据
+"""
+import os
 import random
 import numpy as np
 
@@ -18,6 +20,23 @@ def shuffle_data(x, y):
     x, y = zip(*data)
 
     return x, y
+
+def upsampling_copy(x:np.array, y:np.array, times):
+    """
+    所有数据拷贝几份，增加数据量
+
+    :param x:
+    :param y:
+    :param times: 复制份数
+    :return:
+    """
+    x_t = x.copy()
+    y_t = y.copy()
+    for i in range(times):
+        x_t = np.concatenate((x_t, x.copy()))
+        y_t = np.concatenate((y_t, y.copy()))
+
+    return x_t, y_t
 
 
 def upsampling(x, y, target_number=90):
@@ -62,16 +81,40 @@ def upsampling(x, y, target_number=90):
 
     return np.array(x), np.array(y)
 
+def list_dir(dir):
+    dir_name = []
+    for name in os.listdir(dir):
+        path = os.path.join(dir, name)
+        if os.path.isdir(path):
+            dir_name.append(path)
 
-def get_data(neg_no, pos_no, file_name, shuffle=False):
+    return dir_name
+
+
+def get_file_path(file_name):
+    """
+    在本程序目录下找到指定文件，返回其路径
+
+    :param file_name:文件名
+    :return:该文件的路径
+    """
+    data_dir = list_dir("D:/0-0-pycharm/ImbalanceClassification/data")  # 获取当前位置下所有文件夹
+    for dir in data_dir:
+        file_path = os.path.join(dir, file_name)
+        if os.path.exists(file_path):
+            return file_path
+
+    raise FileNotFoundError(file_name + "不存在")
+
+def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False):
     """
     按指定标签读取文件里的数据，正类为1，负类为0
 
     :param neg_no: 负标签下标
-    :param pos_no: 正标签下标
-    :param file_name:文件名
+    :param pos_no: 正标签下标(-1表示除了指定的正类标签外，其余都为负类)
+    :param file_name: 文件名
     :param shuffle: 是否随机打乱
-    :return:打包好的数据
+    :return: 打包好的数据(array 类型)
 
     Notes
     -----
@@ -89,9 +132,6 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
     > x, y = get_data([1], [0],  "yeast.dat")
     表示读取 yeast.dat 文件，NUC 标签样本作为负样本，MIT 标签样本作为正样本.
     """
-    # 数据根目录
-    root_dir = "/0-0-pycharm/ImbalanceClassification/data"
-
     # 将负样本标签下标转 List (针对只给了一个数字的情况)
     if type(neg_no) is not list:
         neg_no = [neg_no]
@@ -102,13 +142,14 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
     elif type(pos_no) is not list:
         pos_no = [pos_no]
 
-    # 读取数据
-    file_dir = root_dir + "/" + file_name  # 文件路径
+    # 获取文件真实路径
+    file_path = get_file_path(file_name)
+
     x_pos = []
     x_neg = []
     neg_label = []
     pos_label = []
-    with open(file_dir) as file:
+    with open(file_path) as file:
         line = file.readline()
         while line:
             # @ 开头的行都是一些描述行
@@ -147,7 +188,12 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
                     x_pos.append(t)
             line = file.readline()
 
-    IR = len(x_pos) / len(x_neg)  # 计算不平衡率：正（多）/负（少）
+    # 统计样本信息
+    if len(x_neg) != 0:
+        IR = len(x_pos) / len(x_neg)  # 计算不平衡率：正（多）/负（少）
+    else:
+        print("不存在负样本")
+        IR = len(x_pos)
     e = len(x_pos) + len(x_neg)  # 计算总样本数
 
     #
@@ -168,28 +214,30 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
     y = np.concatenate((y_pos, y_neg))
 
     # 打印输出样本详细信息
-    print("-" * 60)
-    print("数据集简报")
-    print("%s label=%d m=%d IR=%.2f pos=%d neg=%d e=%d" % (
-        file_name, len(all_label), len(x[0]), IR, len(x_pos), len(x_neg), e))
-    print("neg_no", neg_no)
-    print("pos_no", pos_no)
+    if show_info:
+        print("-" * 60)
+        print("数据集简报")
+        print("%s label=%d m=%d IR=%.2f pos=%d neg=%d e=%d" % (
+            file_name, len(all_label), len(x[0]), IR, len(x_pos), len(x_neg), e))
+        print("neg_no", neg_no)
+        print("pos_no", pos_no)
 
-    # 打印样本简报
-    dataset_name = file_name.split(".")[0]
-    for k in neg_no:
-        dataset_name += "-" + str(k)
-    if len(pos_no) != len(all_label) - len(neg_no):
-        dataset_name += " vs. "
-        for i, k in enumerate(pos_no):
-            if i == 0:
-                dataset_name += str(k)
-            else:
-                dataset_name += "-" + str(k)
-    print("数据集\t类别数量\t属性数量\t不平衡比")
-    print("%s\t%d\t%d\t%d/%d=%.2f" % (
-    dataset_name, len(pos_label) + len(neg_label), len(x[0]), len(x_pos), len(x_neg), IR))
-    print("-" * 60)
+        # 打印样本简报
+        print("")
+        dataset_name = file_name.split(".")[0]
+        for k in neg_no:
+            dataset_name += "-" + str(k)
+        if len(pos_no) != len(all_label) - len(neg_no):
+            dataset_name += " vs. "
+            for i, k in enumerate(pos_no):
+                if i == 0:
+                    dataset_name += str(k)
+                else:
+                    dataset_name += "-" + str(k)
+        print("%-20s%-20s%-20s%-20s" % ("name", "class", "attribute", "imbalance"))
+        print("%-20s%-20d%-20d%-20s" % (dataset_name, len(pos_label) + len(neg_label), len(x[0]),
+                                        "%d/%d=%.2f" % (len(x_pos), len(x_neg), IR)))
+        print("-" * 60)
 
     # 是否随机打乱
     if shuffle:
@@ -202,11 +250,12 @@ def get_data(neg_no, pos_no, file_name, shuffle=False):
     return x, y
 
 
+
+
 if __name__ == '__main__':
     # 读取数据
-    x, y = get_data([7], -1,  "20到25/isolet5.dat")
+    x, y = get_data([0], -1, "ecoli.dat")
 
-    x, y = upsampling(x, y)
 
     print(len(y[y == 0]))
     print(len(y[y == 1]))

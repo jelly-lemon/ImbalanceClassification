@@ -4,8 +4,6 @@ import random
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
-from sampler.DBUSampler import DBUSampler
-
 
 class AdaSamplingBaggingClassifier:
     def __init__(self, n_estimator):

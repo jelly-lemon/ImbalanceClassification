@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
-from sampler.DBUSampler import DBUSampler
+from myidea.DBUSampler import DBUSampler
 
 
 class DBUBaggingClassifier:

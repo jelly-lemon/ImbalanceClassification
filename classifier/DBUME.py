@@ -8,7 +8,7 @@ from imblearn.under_sampling import RandomUnderSampler
 from sklearn.cluster import KMeans
 from sklearn.tree import DecisionTreeClassifier
 
-from equation import get_R_matrix, get_S_matrix
+from compare.equation import get_R_matrix, get_S_matrix
 from data.read_data import shuffle_data
 
 

@@ -1,14 +1,12 @@
-import random
-
 import numpy as np
 from sklearn import metrics
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
 
-from equation import get_R_matrix, get_S_matrix
+from compare.equation import get_R_matrix, get_S_matrix
 from evolutor.PSOEvolutor import PSOEvolutor
-from other.metrics import gmean
-from sampler.DBUSampler import DBUSampler
+from compare.metrics import gmean
+from myidea.DBUSampler import DBUSampler
 
 
 class DBUBaggingClassifier3:

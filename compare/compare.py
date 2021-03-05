@@ -1,12 +1,12 @@
-# 描述：仅仅用来运行常见算法
+"""
+在数据集上运行不平衡分类算法
+"""
 
 import random
 
-from classifier.AdaC2Classifier import AdaC2Classifier
 from classifier.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
-from classifier.HSBaggingClassifier import HSBaggingClassifier
-from other.metrics import gmean
-from data.read_data import get_data, upsampling
+from metrics import gmean
+from data import read_data
 import numpy as np
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
@@ -16,12 +16,14 @@ from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, AdaBoost
 from sklearn.model_selection import KFold
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sampler.DBUSampler import DBUSampler
+from sklearn.svm import SVC
+from myidea.DBUSampler import DBUSampler
+
 
 
 def get_balance(x, y):
     """
-    抽取多数类样本中的部分，使其数量和少数类相同
+    随机抽取多数类样本中的部分，使其数量和少数类相同
 
     :param x:样本
     :param y:标签
@@ -46,9 +48,15 @@ def get_balance(x, y):
     return x, y
 
 
+def my_print(s):
+    global kFold_show_info
+    if kFold_show_info:
+        print(s)
+
+
 def kFoldTest(x, y, sampler, classifier, k=10):
     """
-    k折交叉验证
+    k折交叉验证(该函数会打乱数据顺序)
 
     :param x:样本
     :param y:标签
@@ -56,8 +64,9 @@ def kFoldTest(x, y, sampler, classifier, k=10):
     :param classifier:分类器
     :param k:交叉验证折数
     """
-    print("-"*60)
-    print("%s-%s" % (sampler, classifier))
+
+    my_print("-"*60)
+    my_print("%s-%s" % (sampler, classifier))
 
     # 记录评估结果
     val_history = {}
@@ -68,6 +77,17 @@ def kFoldTest(x, y, sampler, classifier, k=10):
     val_history["auc_value"] = []
     val_history["val_gmean"] = []
 
+    # 采样器
+    if sampler == "DBU":
+        x, y = DBUSampler(sampling_rate=0.1).fit_resample(x, y)  # 抽样
+    elif sampler == "RUS":
+        # replacement=False 表示不放回抽样
+        x, y = RandomUnderSampler(replacement=False).fit_resample(x, y)  # 抽样
+    elif sampler == "SMOTE":
+        x, y = SMOTE().fit_resample(x, y)
+    if sampler != "":
+        my_print("平衡后：%d/%d=%.2f" % (len(y[y == 1]), len(y[y == 0]), (len(y[y == 1]) / len(y[y == 0]))))
+
     # k折交叉
     kf = KFold(n_splits=k, shuffle=True)  # 混洗数据
     cur_k = 0
@@ -76,43 +96,35 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         cur_k += 1  # 当前第几折次交叉验证
         x_train, y_train = x[train_index], y[train_index]
         x_val, y_val = x[val_index], y[val_index]
-        print("k = %d" % cur_k)
-        print("训练 正样本：%d 负样本：%d" % (len(y_train[y_train == 1]), len(y_train[y_train == 0])))
-        IR = len(y_train[y_train == 1]) / len(y_train[y_train == 0])
-        print("IR = %.2f" % IR)
-
-        # 采样器
-        if sampler == "DBU":
-            x_train, y_train = DBUSampler(sampling_rate=0.1).fit_resample(x_train, y_train)  # 抽样
-        elif sampler == "RUS":
-            x_train, y_train = RandomUnderSampler(replacement=False).fit_resample(x_train, y_train)  # 抽样
-        elif sampler == "SMOTE":
-            x_train, y_train = SMOTE(k_neighbors=2).fit_resample(x_train, y_train)
+        my_print("[k = %d]" % cur_k)
+        my_print("训练 正样本：%d 负样本：%d IR = %.2f" % (len(y_train[y_train == 1]), len(y_train[y_train == 0]), len(y_train[y_train == 1]) / len(y_train[y_train == 0])))
 
         # 分类器
-        if classifier == "KNN":
+        if classifier.lower() == "knn":
             clf = KNeighborsClassifier()
-        elif classifier == "DT":
+        elif classifier.lower() == "dt":
             clf = DecisionTreeClassifier()
-        elif classifier == "RandomForestClassifier":
-            clf = RandomForestClassifier(n_estimators=15)
+        elif classifier.lower() == "svc":
+            # probability=True 表示可以计算得到概率
+            clf = SVC(probability=True)
+        elif classifier == "RandomForestClassifier" or "RFC" or "RandomForest":
+            clf = RandomForestClassifier()
         elif classifier == "BaggingClassifier":
-            clf = BaggingClassifier(base_estimator=KNeighborsClassifier(), n_estimators=15, bootstrap=True)
-        elif classifier == "AdaBoostClassifier":
+            clf = BaggingClassifier(base_estimator=KNeighborsClassifier(), bootstrap=True)
+        elif classifier == "AdaBoostClassifier" or "AdaBoost":
             clf = AdaBoostClassifier()
-        elif classifier == "EasyEnsembleClassifier":
-            clf = EasyEnsembleClassifier(base_estimator=KNeighborsClassifier(), n_estimators=15)
-        elif classifier == "BalancedBaggingClassifier":
-            clf = BalancedBaggingClassifier(base_estimator=KNeighborsClassifier(), n_estimators=15)
+        elif classifier == "EasyEnsembleClassifier" or "EasyEnsemble":
+            clf = EasyEnsembleClassifier()
+        elif classifier == "BalancedBaggingClassifier" or "BalancedBagging":
+            clf = BalancedBaggingClassifier()
         elif classifier == "AdaSamplingBaggingClassifier":
             clf = AdaSamplingBaggingClassifier(15)
-
 
         # 训练
         clf.fit(x_train, y_train)
 
         # 测试
-        print("测试 正样本：%d 负样本：%d" % (len(y_val[y_val == 1]), len(y_val[y_val == 0])))
+        my_print("测试 正样本：%d 负样本：%d IR = %.2f" % (len(y_val[y_val == 1]), len(y_val[y_val == 0]), len(y_val[y_val == 1]) / len(y_val[y_val == 0])))
         y_proba = clf.predict_proba(x_val)
         y_pred = np.argmax(y_proba, axis=1)
 
@@ -135,43 +147,63 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         val_history["val_gmean"].append(val_gmean)
 
         # 打印输出每折的评估情况
-        print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f val_gmean:%.2f" %
+        my_print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f val_gmean:%.2f" %
               (val_acc, val_precision, val_recall, val_f1, auc_value, val_gmean))
 
     # 统计，求平均值和标准差
-    # print("%s-%s" % (sampler, classifier))
-    # for k in val_history.keys():
-    #     # print("%.4f" % (np.mean(val_history[k])))
-    #     print("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
-    # print("-" * 60)
+    my_print("%s-%s 平均数据" % (sampler, classifier))
+    header = ""
+    value = ""
+    for k in val_history.keys():
+        header += "%-20s" % k
+        value += "%-20s" % ("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
+    my_print(header)
+    my_print(value)
 
-    return val_history
+    # 打印出关键输出，方便复制到 Markdown
+    if sampler != "":
+        model_name = "%s-%s" % (sampler, classifier)
+    else:
+        model_name = classifier
+    f1score = "%.4f ±%.4f" % (np.mean(val_history["val_f1"]), np.std(val_history["val_f1"]))
+    auc = "%.4f ±%.4f" % (np.mean(val_history["auc_value"]), np.std(val_history["auc_value"]))
+    gmean_value = "%.4f ±%.4f" % (np.mean(val_history["val_gmean"]), np.std(val_history["val_gmean"]))
+    copy_data = "|%-20s|%-20s|%-20s|%-20s|" % (model_name, f1score, auc, gmean_value)
+    my_print("[copy]")
+    my_print(copy_data)
+    my_print("-" * 60)
+
+    return copy_data
+
+def one_step():
+    global kFold_show_info
+    kFold_show_info = False
+
+    x, y = read_data.get_data([3], -1, "page-blocks.dat", show_info=True)
+
+    k = 5
+    while len(y)/k < 100:
+        x, y = read_data.upsampling_copy(x, y, 1)
+        print("复制一份后：%d/%d" % (len(y[y == 1]), len(y[y == 0])))
+
+    print("|%-20s|%-20s|%-20s|%-20s|" % ("", "f1score", "auc", "gmean"))
+    print("|%-20s|%-20s|%-20s|%-20s|" % ("----", "----", "----", "----"))
+    method = ("KNN", "DT", "SVC", "RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging")
+    for key in method:
+        result = kFoldTest(x.copy(), y.copy(), sampler="", classifier=key, k=k)
+        print(result)
 
 
 
 
+kFold_show_info = False # k折交叉验证是否打印中间信息
 if __name__ == '__main__':
-    # 获取原始数据
-    x, y = get_data([3], -1,  "60到65/page-blocks.dat")
+    one_step()
 
-    x, y = upsampling(x, y, 90)
-
-
-    # 多次交叉验证
-    history = None
-    for i in range(10):
-        val_history = kFoldTest(x, y, "NO", "AdaSamplingBaggingClassifier", k=2)
-        if history is None:
-            history = val_history
-        else:
-            for k in val_history.keys():
-                history[k] += val_history[k]
-    val_history = history
-    print("-" * 60)
-    for k in val_history.keys():
-        print("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
-    for k in val_history.keys():
-        print(k)
-        print(val_history[k])
-    print("-" * 60)
+    # # 获取原始数据
+    # x, y = read_data.get_data(neg_no=[1], pos_no=-1,  file_name="banana.dat")
+    #
+    # # k 折交叉验证
+    # result = kFoldTest(x, y, sampler="", classifier="BalancedBagging", k=5)
+    # print(result)
 

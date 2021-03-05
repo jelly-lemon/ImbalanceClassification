@@ -1,5 +1,5 @@
 import numpy as np
-from equation import objection_1, objection_2
+from compare.equation import objection_1, objection_2
 
 class PSOEvolutor:
     """

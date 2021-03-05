@@ -1,11 +1,10 @@
 import numpy as np
-from imblearn.under_sampling import RandomUnderSampler
 from sklearn import metrics
 from sklearn.neighbors import KNeighborsClassifier
 
 from evolutor.PSOEvolutor2 import PSOEvolutor2
-from other.metrics import gmean
-from sampler.DBUSampler import DBUSampler
+from compare.metrics import gmean
+from myidea.DBUSampler import DBUSampler
 
 
 class DBUBaggingClassifier4:
