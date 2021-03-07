@@ -3,9 +3,7 @@
 """
 
 import random
-
 from classifier.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
-from metrics import gmean
 from data import read_data
 import numpy as np
 from imblearn.over_sampling import SMOTE
@@ -18,7 +16,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from myidea.DBUSampler import DBUSampler
-
+from compare import mymetrics
 
 
 def get_balance(x, y):
@@ -48,13 +46,7 @@ def get_balance(x, y):
     return x, y
 
 
-def my_print(s):
-    global kFold_show_info
-    if kFold_show_info:
-        print(s)
-
-
-def kFoldTest(x, y, sampler, classifier, k=10):
+def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
     """
     k折交叉验证(该函数会打乱数据顺序)
 
@@ -64,9 +56,9 @@ def kFoldTest(x, y, sampler, classifier, k=10):
     :param classifier:分类器
     :param k:交叉验证折数
     """
-
-    my_print("-"*60)
-    my_print("%s-%s" % (sampler, classifier))
+    if show_info:
+        print("-" * 60)
+        print("%s-%s" % (sampler, classifier))
 
     # 记录评估结果
     val_history = {}
@@ -77,17 +69,6 @@ def kFoldTest(x, y, sampler, classifier, k=10):
     val_history["auc_value"] = []
     val_history["val_gmean"] = []
 
-    # 采样器
-    if sampler == "DBU":
-        x, y = DBUSampler(sampling_rate=0.1).fit_resample(x, y)  # 抽样
-    elif sampler == "RUS":
-        # replacement=False 表示不放回抽样
-        x, y = RandomUnderSampler(replacement=False).fit_resample(x, y)  # 抽样
-    elif sampler == "SMOTE":
-        x, y = SMOTE().fit_resample(x, y)
-    if sampler != "":
-        my_print("平衡后：%d/%d=%.2f" % (len(y[y == 1]), len(y[y == 0]), (len(y[y == 1]) / len(y[y == 0]))))
-
     # k折交叉
     kf = KFold(n_splits=k, shuffle=True)  # 混洗数据
     cur_k = 0
@@ -96,8 +77,25 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         cur_k += 1  # 当前第几折次交叉验证
         x_train, y_train = x[train_index], y[train_index]
         x_val, y_val = x[val_index], y[val_index]
-        my_print("[k = %d]" % cur_k)
-        my_print("训练 正样本：%d 负样本：%d IR = %.2f" % (len(y_train[y_train == 1]), len(y_train[y_train == 0]), len(y_train[y_train == 1]) / len(y_train[y_train == 0])))
+        if sampler != "" and show_info:
+            print("采样前：%d/%d=%.2f" % (len(y_train[y_train == 1]), len(y_train[y_train == 0]),
+                                      (len(y_train[y_train == 1]) / len(y_train[y_train == 0]))))
+
+        # 采样器
+        if sampler == "DBU":
+            x_train, y_train = DBUSampler(sampling_rate=0.1).fit_resample(x_train, y_train)  # 抽样
+        elif sampler == "RUS":
+            # replacement=False 表示不放回抽样
+            x_train, y_train = RandomUnderSampler(replacement=False).fit_resample(x_train, y_train)  # 抽样
+        elif sampler == "SMOTE":
+            x_train, y_train = SMOTE().fit_resample(x_train, y_train)
+        if sampler != "" and show_info:
+            print("采样后：%d/%d=%.2f" % (len(y_train[y_train == 1]), len(y_train[y_train == 0]),
+                                      (len(y_train[y_train == 1]) / len(y_train[y_train == 0]))))
+        if show_info:
+            print("[k = %d]" % cur_k)
+            print("训练 正样本：%d 负样本：%d IR = %.2f" % (len(y_train[y_train == 1]), len(y_train[y_train == 0]),
+                                                  len(y_train[y_train == 1]) / len(y_train[y_train == 0])))
 
         # 分类器
         if classifier.lower() == "knn":
@@ -124,7 +122,9 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         clf.fit(x_train, y_train)
 
         # 测试
-        my_print("测试 正样本：%d 负样本：%d IR = %.2f" % (len(y_val[y_val == 1]), len(y_val[y_val == 0]), len(y_val[y_val == 1]) / len(y_val[y_val == 0])))
+        if show_info:
+            print("测试 正样本：%d 负样本：%d IR = %.2f" % (
+                len(y_val[y_val == 1]), len(y_val[y_val == 0]), len(y_val[y_val == 1]) / len(y_val[y_val == 0])))
         y_proba = clf.predict_proba(x_val)
         y_pred = np.argmax(y_proba, axis=1)
 
@@ -134,7 +134,7 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         val_recall = metrics.recall_score(y_val, y_pred)
         val_f1 = metrics.f1_score(y_val, y_pred)
         auc_value = metrics.roc_auc_score(y_val, y_proba[:, 1])
-        val_gmean = gmean(y_val, y_pred)
+        val_gmean = mymetrics.gmean(y_val, y_pred)
         # auc_value = 0
         # val_gmean = 0
 
@@ -147,42 +147,52 @@ def kFoldTest(x, y, sampler, classifier, k=10):
         val_history["val_gmean"].append(val_gmean)
 
         # 打印输出每折的评估情况
-        my_print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f val_gmean:%.2f" %
-              (val_acc, val_precision, val_recall, val_f1, auc_value, val_gmean))
+        if show_info:
+            print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f val_gmean:%.2f" %
+                  (val_acc, val_precision, val_recall, val_f1, auc_value, val_gmean))
 
     # 统计，求平均值和标准差
-    my_print("%s-%s 平均数据" % (sampler, classifier))
     header = ""
     value = ""
     for k in val_history.keys():
         header += "%-20s" % k
         value += "%-20s" % ("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
-    my_print(header)
-    my_print(value)
+    if show_info:
+        print("%s-%s 平均数据" % (sampler, classifier))
+        print(header)
+        print(value)
 
     # 打印出关键输出，方便复制到 Markdown
     if sampler != "":
         model_name = "%s-%s" % (sampler, classifier)
     else:
         model_name = classifier
-    f1score = "%.4f ±%.4f" % (np.mean(val_history["val_f1"]), np.std(val_history["val_f1"]))
-    auc = "%.4f ±%.4f" % (np.mean(val_history["auc_value"]), np.std(val_history["auc_value"]))
-    gmean_value = "%.4f ±%.4f" % (np.mean(val_history["val_gmean"]), np.std(val_history["val_gmean"]))
-    copy_data = "|%-20s|%-20s|%-20s|%-20s|" % (model_name, f1score, auc, gmean_value)
-    my_print("[copy]")
-    my_print(copy_data)
-    my_print("-" * 60)
 
-    return copy_data
+    all_data = "|%-20s" % model_name
+    key_data = "|%-20s" % model_name
+    for k in val_history.keys():
+        t = "|%-20s" % ("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
+        all_data += t
+        if k in ("val_f1", "auc_value", "val_gmean"):
+            key_data += t
+
+    if show_info:
+        print(all_data)
+        print(key_data)
+        print("-" * 60)
+
+    return all_data, key_data
+
 
 def one_step():
-    global kFold_show_info
-    kFold_show_info = False
+    """
+    一步到位运行所有对比方法
 
+    """
     x, y = read_data.get_data([3], -1, "page-blocks.dat", show_info=True)
 
     k = 5
-    while len(y)/k < 100:
+    while len(y) / k < 100:
         x, y = read_data.upsampling_copy(x, y, 1)
         print("复制一份后：%d/%d" % (len(y[y == 1]), len(y[y == 0])))
 
@@ -194,9 +204,6 @@ def one_step():
         print(result)
 
 
-
-
-kFold_show_info = False # k折交叉验证是否打印中间信息
 if __name__ == '__main__':
     one_step()
 
@@ -206,4 +213,3 @@ if __name__ == '__main__':
     # # k 折交叉验证
     # result = kFoldTest(x, y, sampler="", classifier="BalancedBagging", k=5)
     # print(result)
-

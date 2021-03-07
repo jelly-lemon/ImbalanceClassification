@@ -98,13 +98,24 @@ def get_file_path(file_name):
     :param file_name:文件名
     :return:该文件的路径
     """
-    data_dir = list_dir("D:/0-0-pycharm/ImbalanceClassification/data")  # 获取当前位置下所有文件夹
-    for dir in data_dir:
-        file_path = os.path.join(dir, file_name)
+    file_path = None
+    if "./raw_data" in list_dir("./"):
+        file_path = os.path.join("./raw_data", file_name)
+
+    if "./data" in list_dir("./"):
+        file_path = os.path.join("./data/raw_data", file_name)
+
+    if "../data" in list_dir("../"):
+        file_path = os.path.join("../data/raw_data", file_name)
+
+    if "../../data" in list_dir("../../"):
+        file_path = os.path.join("../../data/raw_data", file_name)
+
+    if file_path is not None:
         if os.path.exists(file_path):
             return file_path
 
-    raise FileNotFoundError(file_name + "不存在")
+    raise FileNotFoundError(file_path, "不存在")
 
 def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False):
     """
@@ -154,7 +165,7 @@ def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False):
         while line:
             # @ 开头的行都是一些描述行
             if line[0] == "@":
-                if line.find("Class") != -1 and line.find("{") != -1:
+                if (line.find("Class") != -1 or line.find("Type") != -1) and line.find("{") != -1:
                     s = line[line.find("{") + 1:-2]
                     s = s.replace(" ", "")
                     all_label = s.split(",")
@@ -216,7 +227,6 @@ def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False):
     # 打印输出样本详细信息
     if show_info:
         print("-" * 60)
-        print("数据集简报")
         print("%s label=%d m=%d IR=%.2f pos=%d neg=%d e=%d" % (
             file_name, len(all_label), len(x[0]), IR, len(x_pos), len(x_neg), e))
         print("neg_no", neg_no)
@@ -254,7 +264,7 @@ def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False):
 
 if __name__ == '__main__':
     # 读取数据
-    x, y = get_data([0], -1, "ecoli.dat")
+    x, y = get_data([0], -1, "vowel.dat", show_info=True)
 
 
     print(len(y[y == 0]))

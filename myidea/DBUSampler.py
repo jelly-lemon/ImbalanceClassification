@@ -1,6 +1,8 @@
 """
-基于密度的下采样器
-当采样率比较高时，比如为原数据集的80%，那么完成整个下采样就非常耗时。
+基于密度的下采样器。思想来自论文。
+
+个人体会：
+当采样率比较高时，比如为原数据集的 80%，那么完成整个下采样就非常耗时。
 后面的样本很难采集到，因为是随机生成一个数再来判断在不在采样区间嘛。
 """
 
@@ -12,7 +14,7 @@ class DBUSampler:
     """
     Density-Based Under-Sampling Operator 基于密度的下采样器
 
-    默认正样本为1（多数类），负样本为0（少数类）
+    默认正样本为 1（多数类），负样本为 0（少数类）
 
     Examples
     --------
@@ -20,7 +22,7 @@ class DBUSampler:
     >> new_x, new_y = dub.fit(x, y)
     """
 
-    def __init__(self, K_Neighbor=5, H_Neighbor=5, sampling_rate=None):
+    def __init__(self, K_Neighbor=5, H_Neighbor=5, sampling_rate=None, show_info=False):
         """
         初始化采样器
 
@@ -31,6 +33,7 @@ class DBUSampler:
         self.H_Neighbor = H_Neighbor
 
         self.sampling_rate = sampling_rate
+        self.show_info = show_info  # 是否打印中间提示信息
 
         # 初始化相关变量
         self.delt_star = None  # 累计密度因子
@@ -42,6 +45,13 @@ class DBUSampler:
         self.all_delt_i = None  # 样本xi的采样边界
         self.dis_p = None  # 正样本集合中各点之间的距离
         self.dis_n = None  # 正样本xi到负样本集中各点之间的距离
+
+    def my_print(self, s):
+        """
+        print 打印，可以用 show_info 变量打开或关闭
+        """
+        if self.show_info:
+            print(s)
 
     def get_dis_p(self, dis_p, T_p):
         """
@@ -82,8 +92,11 @@ class DBUSampler:
         """
         下采样数据集，返回的格式和输入相同，只是量变少了
 
+        :param x:
+        :param y:
         :return: 采样后的数据集
         """
+
         # 统计样本信息
         self.N = len(y)  # 样本个数
         self.T_p = [list(x[i]) for i in range(len(y)) if y[i] == 1]  # 正样本集
@@ -103,18 +116,19 @@ class DBUSampler:
         self.dis_n = [[-1 for i in range(self.N_neg)] for j in range(self.N_pos)]  # 正样本xi到负样本集中各点之间的距离
 
         # 求正样本集中各点之间的距离
-        # print("计算正样本集中各点之间的距离...", end="")
+        self.my_print("计算正样本集中各点之间的距离...")
         self.dis_p = self.get_dis_p(self.dis_p, self.T_p)
 
         # 正样本xi到负样本集中各点之间的距离
-        # print("\r计算正样本xi到负样本集中各点之间的距离...", end="")
+        self.my_print("计算正样本xi到负样本集中各点之间的距离...")
         self.dis_n = self.get_dis_n(self.dis_n, self.T_p, self.T_n)
 
         # 计算 Ri
-        # print("\r计算Ri...", end="")
+        self.my_print("计算Ri...")
         for i in range(1, self.N_pos + 1):
             self.get_R(i)  # i表示样本编号，从1开始
 
+        # 计算采样率
         if self.sampling_rate is None:
             # 根据不平衡比设定采样率
             if self.N_pos / self.N_neg <= 5:
@@ -123,7 +137,7 @@ class DBUSampler:
                 self.sampling_rate = 0.1
 
         # 开始采样
-        print("\r开始采样（采样率%.2f）..." % self.sampling_rate)
+        self.my_print("开始采样（采样率%.2f）..." % self.sampling_rate)
         count = 0  # 当前采样个数
         T_p_new = []  # 存放采样样本的集合
         while count < int(self.N_pos * self.sampling_rate):  # 下采样数量=正样本数量*采样率
@@ -263,3 +277,14 @@ class DBUSampler:
             self.delt_star = res
 
             return res
+
+
+if __name__ == '__main__':
+    pass
+    # 随机生产一堆二维数据点
+
+    # 画在图片上
+
+    # 进行基于密度降采样
+
+    # 画出降采样后的图片

@@ -4,8 +4,8 @@ from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
 
 from compare.equation import get_R_matrix, get_S_matrix
-from evolutor.PSOEvolutor import PSOEvolutor
-from compare.metrics import gmean
+from compare import PSOEvolutor
+from compare.mymetrics import gmean
 from myidea.DBUSampler import DBUSampler
 
 

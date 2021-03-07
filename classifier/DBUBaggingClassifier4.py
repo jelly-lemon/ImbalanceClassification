@@ -2,8 +2,8 @@ import numpy as np
 from sklearn import metrics
 from sklearn.neighbors import KNeighborsClassifier
 
-from evolutor.PSOEvolutor2 import PSOEvolutor2
-from compare.metrics import gmean
+from compare import PSOEvolutor2
+from compare.mymetrics import gmean
 from myidea.DBUSampler import DBUSampler
 
 
