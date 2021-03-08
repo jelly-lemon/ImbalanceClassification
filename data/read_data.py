@@ -39,7 +39,7 @@ def upsampling_copy(x:np.array, y:np.array, times):
     return x_t, y_t
 
 
-def upsampling(x, y, target_number=90):
+def upsampling_random(x, y, target_number=90):
     """
     过采样，随机选中某些样本进行复制，然后添加到原数据集中
 
@@ -117,7 +117,7 @@ def get_file_path(file_name):
 
     raise FileNotFoundError(file_path, "不存在")
 
-def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False):
+def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False, need_copy=False):
     """
     按指定标签读取文件里的数据，正类为1，负类为0
 
@@ -253,9 +253,17 @@ def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False):
     if shuffle:
         x, y = shuffle_data(x, y)
 
+
     # 转为数组
     x = np.array(x)
     y = np.array(y)
+
+    # 如果数据集较小，是否复制扩充
+    if need_copy:
+        while len(y[y == 0]) / 5 < 50:
+            x, y = upsampling_copy(x, y, 1)
+            if show_info:
+                print("1次复制扩充")
 
     return x, y
 

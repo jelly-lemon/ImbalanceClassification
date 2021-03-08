@@ -15,6 +15,7 @@ from sklearn.model_selection import KFold
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
+
 from myidea.DBUSampler import DBUSampler
 from compare import mymetrics
 
@@ -46,9 +47,10 @@ def get_balance(x, y):
     return x, y
 
 
+
 def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
     """
-    k折交叉验证(该函数会打乱数据顺序)
+    k折交叉验证(该函数会打乱数据顺序，无需手动再打乱)
 
     :param x:样本
     :param y:标签
@@ -82,8 +84,8 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
                                       (len(y_train[y_train == 1]) / len(y_train[y_train == 0]))))
 
         # 采样器
-        if sampler == "DBU":
-            x_train, y_train = DBUSampler(sampling_rate=0.1).fit_resample(x_train, y_train)  # 抽样
+        if sampler in ("DBU", "DUS"):
+            x_train, y_train = DBUSampler(show_info=True).fit_resample(x_train, y_train)  # 抽样
         elif sampler == "RUS":
             # replacement=False 表示不放回抽样
             x_train, y_train = RandomUnderSampler(replacement=False).fit_resample(x_train, y_train)  # 抽样
@@ -105,15 +107,15 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
         elif classifier.lower() == "svc":
             # probability=True 表示可以计算得到概率
             clf = SVC(probability=True)
-        elif classifier == "RandomForestClassifier" or "RFC" or "RandomForest":
+        elif classifier in ("RandomForestClassifier", "RFC", "RandomForest"):
             clf = RandomForestClassifier()
         elif classifier == "BaggingClassifier":
             clf = BaggingClassifier(base_estimator=KNeighborsClassifier(), bootstrap=True)
-        elif classifier == "AdaBoostClassifier" or "AdaBoost":
+        elif classifier in ("AdaBoostClassifier", "AdaBoost"):
             clf = AdaBoostClassifier()
-        elif classifier == "EasyEnsembleClassifier" or "EasyEnsemble":
+        elif classifier in ("EasyEnsembleClassifier", "EasyEnsemble"):
             clf = EasyEnsembleClassifier()
-        elif classifier == "BalancedBaggingClassifier" or "BalancedBagging":
+        elif classifier in ("BalancedBaggingClassifier", "BalancedBagging"):
             clf = BalancedBaggingClassifier()
         elif classifier == "AdaSamplingBaggingClassifier":
             clf = AdaSamplingBaggingClassifier(15)
@@ -135,8 +137,6 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
         val_f1 = metrics.f1_score(y_val, y_pred)
         auc_value = metrics.roc_auc_score(y_val, y_proba[:, 1])
         val_gmean = mymetrics.gmean(y_val, y_pred)
-        # auc_value = 0
-        # val_gmean = 0
 
         # 存储评估结果
         val_history["val_acc"].append(val_acc)

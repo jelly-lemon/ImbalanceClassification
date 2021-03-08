@@ -1,5 +1,6 @@
-# 描述：NSAG-II 遗传算法
-# 作者：Jelly Lemon
+"""
+NSAG-II 遗传算法
+"""
 
 import math
 import random

@@ -9,6 +9,8 @@
 import random
 import numpy as np
 
+from data import read_data
+
 
 class DBUSampler:
     """
@@ -130,11 +132,7 @@ class DBUSampler:
 
         # 计算采样率
         if self.sampling_rate is None:
-            # 根据不平衡比设定采样率
-            if self.N_pos / self.N_neg <= 5:
-                self.sampling_rate = 0.3
-            else:
-                self.sampling_rate = 0.1
+            self.sampling_rate = len(y[y == 0]) / len(y[y == 1])
 
         # 开始采样
         self.my_print("开始采样（采样率%.2f）..." % self.sampling_rate)
@@ -280,11 +278,10 @@ class DBUSampler:
 
 
 if __name__ == '__main__':
-    pass
-    # 随机生产一堆二维数据点
-
-    # 画在图片上
+    # 获取原始数据
+    x, y = read_data.get_data([0, 6], -1, "yeast.dat", show_info=True)
 
     # 进行基于密度降采样
+    x, y = DBUSampler(show_info=True).fit_resample(x, y)
 
-    # 画出降采样后的图片
+    print("%d/%d=%.2f" % (len(y[y == 0]), len(y[y == 1]), len(y[y == 0])/len(y[y == 1])))
