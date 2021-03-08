@@ -1,6 +1,9 @@
-基于密度的下采样(DUS) vs 随机采样(RUS)
+# 实验目的
+基于密度的下采样(DUS) 比 随机采样(RUS) 表现好吗？
 
+# 实验内容
 
+# 实验数据
 ## yeast-0-6 1205/279=4.32
 
 |                    |val_acc             |val_precision       |val_recall          |val_f1              |auc_value           |val_gmean           

@@ -16,6 +16,8 @@ Support Vector Machines (SVM)（支持向量机）
 Decision Trees（决策树）
 
 # 项目环境
+sklearn   
+imblearn   
 
 # 遇到的问题
 Q：为什么要进行降采样？（不平衡分类会导致什么问题？）   

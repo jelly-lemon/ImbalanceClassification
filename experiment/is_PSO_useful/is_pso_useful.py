@@ -49,8 +49,8 @@ def show_mean_data(history):
 
 def kFoldEvolution(x, y):
     # 记录评估结果
-    val_history = {}
-    evo_history = {}
+    val_history = {}    # 进化前的预测结果
+    evo_history = {}    # 进化后的预测结果
 
     kf = KFold(n_splits=5, shuffle=True)  # 混洗数据
     cur_k = 0
