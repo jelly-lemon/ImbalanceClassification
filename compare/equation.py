@@ -87,25 +87,4 @@ def get_S_matrix(x):
     return mat
 
 
-def get_R_matrix(result, n_cluster_center):
-    """
-    将获得的聚类结果转 one-hot 矩阵
 
-    例如：
-    聚类结果 [1 2 0 0 1 2 0]
-    转成 one-hot 矩阵
-    [[0 1 0]
-     [0 0 1]
-     [1 0 0]
-     ...
-     [1 0 0]]
-
-    :param result: 聚类结果
-    :return:
-    """
-
-    mat = np.zeros((len(result), n_cluster_center), np.uint8)
-    for index, num in enumerate(result):
-        mat[index][num] = 1
-
-    return mat

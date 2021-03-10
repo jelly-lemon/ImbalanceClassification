@@ -7,19 +7,20 @@
 
 """
 import numpy as np
-from sklearn import metrics
 from sklearn.cluster import KMeans
 from sklearn.model_selection import KFold
 
-from compare import mymetrics
 from data import read_data
-from myidea.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
+from experiment import experiment_helper
+from myidea.HybridBaggingClassifier import hybridBaggingClassifier
 import warnings
 
+
+# 忽略找不到那么多聚类质心的警告
 warnings.filterwarnings('ignore')
 
 
-class mopso:
+class mopso():
     """
     多目标粒子群优化算法
     """
@@ -227,7 +228,8 @@ class mopso:
             if i == 0 or i == len(func_value) - 1:
                 continue
             else:
-                crowding_dis[i] = ((func_value[i + 1][0] - func_value[i - 1][1]) + (func_value[i + 1][1] - func_value[i - 1][1])) * 2
+                crowding_dis[i] = ((func_value[i + 1][0] - func_value[i - 1][1]) + (
+                            func_value[i + 1][1] - func_value[i - 1][1])) * 2
 
         # 找到拥挤度最小值下标
         min_pos = 0
@@ -247,12 +249,13 @@ class mopso:
         max_steps = max_steps  # 最大迭代次数
         particle_dim = pso[0].shape  # 粒子的维度
         init_weight = 0.6  # 初始惯性权重与当前惯性权重
-        end_weight = 0.1  # 结束惯性权重
-        c1 = c2 = 2  # 个体学习因子、社会学习因子
+        end_weight = 0.4  # 结束惯性权重
+        c1 = 1  # 个体学习因子
+        c2 = 2  # 社会学习因子
 
         # 评估每个粒子并得到全局最优
         pBest = pso.copy()  # 存放每个粒子的历史最优位置，默认初始位置为最优位置
-        pBest_func_value = [(self.func_1(u), self.func_2(u)) for u in pBest]    # 计算每个粒子的目标函数值
+        pBest_func_value = [(self.func_1(u), self.func_2(u)) for u in pBest]  # 计算每个粒子的目标函数值
         gBest = self.get_gBest(pBest, pBest_func_value)  # 获取这一届总体最优位置
 
         # 随机初始化每一个粒子的速度
@@ -264,10 +267,9 @@ class mopso:
         for step in range(max_steps):
             if show_info:
                 if step == max_steps - 1:
-                    print("\r%d/%d" % (step+1, max_steps))
+                    print("\r%d/%d" % (step + 1, max_steps))
                 else:
-                    print("\r%d/%d" % (step+1, max_steps), end="")
-
+                    print("\r%d/%d" % (step + 1, max_steps), end="")
 
             # 计算本次迭代惯性因子
             cur_weight = init_weight - step * (init_weight - end_weight) / (max_steps - 1)
@@ -303,80 +305,34 @@ class mopso:
                     gBest_func_value = pBest_func_value[i]
 
         # 对所有粒子求平均，这就是进化后的预测结果
-        # y_prob = np.mean(pso, axis=0)
-        y_prob = np.mean(pBest, axis=0)
+        y_prob = np.mean(pso, axis=0)
+        # y_prob = np.mean(pBest, axis=0)
 
         return y_prob
-        # return gBest
-
-def save_metric(history: dict, y_val, y_pred, y_proba):
-    if len(history.keys()) == 0:
-        history["val_acc"] = []
-        history["val_precision"] = []
-        history["val_recall"] = []
-        history["val_f1"] = []
-        history["auc_value"] = []
-        history["val_gmean"] = []
-
-    val_acc = metrics.accuracy_score(y_val, y_pred)
-    val_precision = metrics.precision_score(y_val, y_pred)
-    val_recall = metrics.recall_score(y_val, y_pred)
-    val_f1 = metrics.f1_score(y_val, y_pred)
-    auc_value = metrics.roc_auc_score(y_val, y_proba[:, 1])
-    val_gmean = mymetrics.gmean(y_val, y_pred)
-
-    # 存储结果
-    history["val_acc"].append(val_acc)
-    history["val_precision"].append(val_precision)
-    history["val_recall"].append(val_recall)
-    history["val_f1"].append(val_f1)
-    history["auc_value"].append(auc_value)
-    history["val_gmean"].append(val_gmean)
-
-
-def show_last_data(history):
-    header = "|%-20s" % ""
-    value = "|%-20s" % ""
-    for key in history.keys():
-        header += "|%-20s" % key
-        value += "|%-20.2f" % history[key][-1]
-    print(header)
-    print(value)
-    # print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f val_gmean:%.2f" %
-    #       (history["val_acc"][-1], history["val_precision"][-1],
-    #        history["val_recall"][-1], history["val_f1"][-1], history["auc_value"][-1],
-    #        history["val_gmean"][-1]))
-
-
-def show_mean_data(history):
-    s = ""
-    for k in history.keys():
-        s += "|%-20s" % ("%.4f ±%.4f" % (np.mean(history[k]), np.std(history[k])))
-    print(s)
-
 
 def kFoldEvolution(x, y):
     # 记录评估结果
     val_history = {}  # 进化前的预测结果
     evo_history = {}  # 进化后的预测结果
 
-    kf = KFold(n_splits=5, shuffle=True)  # 混洗数据
+    k = 5
+    kf = KFold(n_splits=k, shuffle=True)  # 混洗数据
     cur_k = 0
     for train_index, val_index in kf.split(x, y):
         # 划分数据
         cur_k += 1  # 当前第几折次交叉验证
+        print("%d/%d 交叉验证" % (cur_k, k))
         x_train, y_train = x[train_index], y[train_index]
         x_val, y_val = x[val_index], y[val_index]
 
-        # 打乱数据
-
-
         # 分类器
         # clf = KNeighborsClassifier()
-        clf = AdaSamplingBaggingClassifier(3)
+        #clf = AdaSamplingBaggingClassifier(3)
+        clf = hybridBaggingClassifier(3, 3)
 
         # 训练
-        clf.fit(x_train, y_train, sampling="under", show_info=True)
+        #clf.fit(x_train, y_train, sampling="under", show_info=True)
+        clf.fit(x_train, y_train)
 
         # 测试
         all_y_proba = clf.predict_proba_2(x_val)
@@ -384,24 +340,25 @@ def kFoldEvolution(x, y):
         y_pred = np.argmax(y_proba, axis=1)
 
         # 进化前的表现
-        save_metric(val_history, y_val, y_pred, y_proba)
+        experiment_helper.save_metric(val_history, y_val, y_pred, y_proba)
         print("进化前：")
-        show_last_data(val_history)
+        experiment_helper.show_last_data(val_history)
 
         # 进化
-        y_proba = mopso(x_val).evolute(all_y_proba, max_steps=10, show_info=True)
+        y_proba = mopso(x_val).evolute(all_y_proba, max_steps=50, show_info=True)
         y_pred = np.argmax(y_proba, axis=1)
 
         # 进化后的表现
-        save_metric(evo_history, y_val, y_pred, y_proba)
+        experiment_helper.save_metric(evo_history, y_val, y_pred, y_proba)
         print("进化后：")
-        show_last_data(evo_history)
+        experiment_helper.show_last_data(evo_history)
+        print("-" * 60)
 
     # 统计，求平均值和标准差
     print("进化前平均：")
-    show_mean_data(val_history)
+    experiment_helper.show_mean_data(val_history)
     print("进化后平均：")
-    show_mean_data(evo_history)
+    experiment_helper.show_mean_data(evo_history)
 
 
 if __name__ == '__main__':

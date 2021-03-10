@@ -35,6 +35,14 @@ class myRandomSampler():
 
 
     def resample(self, data, sampling_rate, replacement=True):
+        """
+        随机采样
+
+        :param data: 数据
+        :param sampling_rate: 采样率
+        :param replacement: 是否放回
+        :return:
+        """
         if replacement:
             data = random.choices(data, k=int(sampling_rate * len(data)))
             return data
