@@ -3,7 +3,7 @@
 """
 
 import random
-from classifier.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
+from myidea.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
 from data import read_data
 import numpy as np
 from imblearn.over_sampling import SMOTE
@@ -16,7 +16,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 
-from myidea.DBUSampler import DBUSampler
+from other_people.DBUSampler import DBUSampler
 from compare import mymetrics
 
 
@@ -211,5 +211,5 @@ if __name__ == '__main__':
     # x, y = read_data.get_data(neg_no=[1], pos_no=-1,  file_name="banana.dat")
     #
     # # k 折交叉验证
-    # result = kFoldTest(x, y, sampler="", classifier="BalancedBagging", k=5)
+    # result = kFoldTest(x, y, sampler="", other_people="BalancedBagging", k=5)
     # print(result)

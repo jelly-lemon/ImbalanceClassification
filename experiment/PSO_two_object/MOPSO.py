@@ -7,6 +7,16 @@
 
 """
 import numpy as np
+from sklearn import metrics
+from sklearn.cluster import KMeans
+from sklearn.model_selection import KFold
+
+from compare import mymetrics
+from data import read_data
+from myidea.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
+import warnings
+
+warnings.filterwarnings('ignore')
 
 
 class mopso:
@@ -14,170 +24,210 @@ class mopso:
     多目标粒子群优化算法
     """
 
-    def __init__(self, R, S, U, Q):
-        self.R = R
-        self.S = S
-        self.U = U
-        self.Q = Q
+    def __init__(self, x):
+        # 样本相似度矩阵
+        self.S = self.get_S_matrix(x)
 
-    def fast_non_dominated_sort(self, P):
+    def clustering(self, u):
+        """
+        聚类
+
+        :param u:
+        :return:
+        """
+        kmeans_cluster = KMeans()
+        cluster_res = kmeans_cluster.fit_predict(u)  # 获得聚类结果
+        n_cluster_center = len(kmeans_cluster.cluster_centers_)  # 取得簇数量
+        r = self.get_r_matrix(cluster_res, n_cluster_center)  # 聚类结果矩阵
+        q = kmeans_cluster.cluster_centers_[:n_cluster_center]  # 获取聚类质心
+
+        return r, q
+
+    def gaussian(self, a, b, sigma):
+        """
+        高斯函数
+        """
+        t = np.exp(-np.linalg.norm(a - b) / (2 * sigma ** 2))
+        return t
+
+    def sim(self, a, b):
+        """
+        计算相似度
+
+        :param a: 数据 a
+        :param b: 数据 b
+        :return: 相似度
+        """
+        return self.gaussian(a, b, 1)
+
+    def get_S_matrix(self, x):
+        """
+        计算相似度矩阵(计算样本之间的相似度或预测结果之间的相似度)
+
+        例如：
+        样本的预测结果（属于类别0的概率，属于类别1的概率）：
+        [[0.8 0.2]
+         [0.4 0.6]
+         [0.  1. ]]
+
+        得到相似度矩阵 3x3：
+        [[1.         0.32259073 0.10406478]
+         [0.32259073 1.         0.32259073]
+         [0.10406478 0.32259073 1.]]
+
+        :param x: 预测结果概率
+        :return: 相似度矩阵
+        """
+        mat = np.zeros((len(x), len(x)))
+        for i, i_value in enumerate(x):
+            for j, j_value in enumerate(x):
+                mat[i][j] = self.sim(i_value, j_value)
+        return mat
+
+    def get_r_matrix(self, cluster_result, n_cluster_center):
+        """
+        将获得的聚类结果转 one-hot 矩阵
+
+        例如：
+        聚类结果 [1 2 0 0 1 2 0]
+        转成 one-hot 矩阵
+        [[0 1 0]
+         [0 0 1]
+         [1 0 0]
+         ...
+         [1 0 0]]
+
+        :param cluster_result: 聚类结果
+        :return:
+        """
+
+        mat = np.zeros((len(cluster_result), n_cluster_center), np.uint8)
+        for index, num in enumerate(cluster_result):
+            mat[index][num] = 1
+
+        return mat
+
+    def fast_non_dominated_sort(self, pso, func_value):
         """
         快速非支配排序
 
-        :param P: 种群
+        :param pso: 种群
         :return: 第一个非支配层个体集合
         """
-        S = {}  # 支配个体集合。例如，p 支配的个体集合 S[p]
-        n = {}  # 支配个体数量。例如，支配 p 的个体数量 n[p]
-        rank = {}   # 个体所属层级。例如, p 的所属层级 rank[p]
-        F = {}  # 某一层级个体集合。例如，第一非支配层 F[1]
+        F1_func_value = []
+        n = np.zeros((len(pso),), dtype=np.uint8)  # 支配个体数量。例如，支配 p 的个体数量 n[p]
+        F1 = []  # 某一层级个体集合。例如，第一非支配层 F[1]
 
         # 计算得到第一非支配层个体集合
-        for p in P:
-            S[p] = []   # p 支配的个体集合
-            n[p] = 0    # 支配 p 的个体数量
-            for q in P:
-                if (self.compare(p, q) > 0):
-                    S[p].append(q)
-                elif (self.compare(p, q) < 0):
-                    n[p] += 1
-            if n[p] == 0:
-                rank[p] = 1
-                F[1].append(p)
+        for i, p in enumerate(pso):
+            n[i] = 0  # 支配 p 的个体数量
+            for j, q in enumerate(pso):
+                if self.compare(func_value[i], func_value[j]) < 0:
+                    n[i] += 1
+            if n[i] == 0:
+                F1.append(p)
+                F1_func_value.append(func_value[i])
 
-        # 计算剩余个体的所属非支配层
-        # i = 1
-        # while len(F[i]) != 0:
-        #     Q = []
-        #     for p in F[i]:
-        #         for q in S[p]:
-        #             n[q] -= 1
-        #             if n[q] == 0:
-        #                 rank[q] = i + 1
-        #                 Q.append(q)
-        #     i += 1
-        #     F[i] = Q
+        return F1, F1_func_value
 
-        return F[1]
-
-    def compare(self, p, q):
-        """
-        比较个体 p 和 q 谁支配谁
-        :param p:
-        :param q:
-        :return:
-        """
-        p_func_value = (self.func_1(p), self.func_2(p))
-        q_func_value = (self.func_1(p), self.func_2(p))
-
+    def compare(self, func_value_1, func_value_2):
         # p 支配 q
-        if p_func_value[0] < q_func_value[0] and p_func_value[1] < q_func_value[1]:
+        if func_value_1[0] < func_value_2[0] and func_value_1[1] < func_value_2[1]:
             return 1
 
         # q 支配 p
-        if p_func_value[0] > q_func_value[0] and p_func_value[1] > q_func_value[1]:
+        if func_value_1[0] > func_value_2[0] and func_value_1[1] > func_value_2[1]:
             return -1
 
         # p、q 势均力敌
         return 0
 
-    def get_best(self, P):
-        """
-        获取种群中最好的个体
+    def get_gBest(self, pso, func_value):
+        # 计算每个粒子的函数值
 
-        :param P: 种群
-        :return: 最好的个体
-        """
-        # 获取最优前沿，也就是第一非支配层个体集合
-        best_front = self.fast_non_dominated_sort(P)
+        F1, F1_func_value = self.fast_non_dominated_sort(pso, func_value)
 
-        # 获取最优前沿里面的最优个体
-        best_p = self.get_front_best(best_front)
+        p = self.get_front_best(F1, F1_func_value)
 
-        return best_p.copy()
+        return p
 
-    def func_1(self, S, U):
+    def func_1(self, u):
         """
         目标函数 1，值越小越好
 
         思想：两个样本越相似，那么同属于一个类别的概率也越大
-        我们认为，所有样本的 “样本相似度 * 样本类别差距” 加起来，
+        我们认为，所有样本的 “两个样本相似度 * 两个样本预测类别差距” 加起来，
         值越小，预测结果越准确。
 
-        :param S:样本相似度矩阵
-        :param U:分类器预测结果概率矩阵
-        :return:目标函数值
+        :param u: 一个个体，也就是一个分类器的预测概率矩阵
         """
 
-        n_sample = len(U)
+        n_sample = len(u)
         sum = 0
         for i in range(n_sample):
             for j in range(n_sample):
-                sum += S[i][j] * np.linalg.norm(U[i] - U[j])
+                sum += self.S[i][j] * np.linalg.norm(u[i] - u[j])
         return sum
 
-    def func_2(self, n_cluster_center, R, U, Q):
+    def func_2(self, u):
         """
         目标函数 2，值越小越好
 
-        :param n_cluster_center:聚类质心数量
-        :param R:所有样本聚类结果矩阵
-        :param U:分类器预测结果概率矩阵
-        :param Q:分类器对聚类质心的分类结果
+        :param r:所有样本聚类结果 one-hot 矩阵
+        :param u:分类器预测概率矩阵
+        :param q:分类器对聚类质心的分类概率
         :return:
         """
-        n_sample = len(U)
+        r, q = self.clustering(u)
+
+        n_sample = len(u)
+        n_cluster_center = len(r[0])
         sum = 0
         for i in range(n_sample):
             for j in range(n_cluster_center):
-                sum += R[i][j] * np.linalg.norm(U[i] - Q[j])
+                sum += r[i][j] * np.linalg.norm(u[i] - q[j])
         return sum
 
-    def sort(self, individual_set, func_value):
+    def sort(self, pso, func_value):
         """
         对某一种群集合按目标函数 1 的值进行排序
 
-        :param individual_set: 种群
+        :param pso: 种群
         :param func_value:
         :return:
         """
         # 冒泡升序
         n = len(func_value)
-        for i in range(n-1):
-            for j in range(n-i):
-                if func_value[j][0] > func_value[j+1][0]:
+        for i in range(n - 1):
+            for j in range(n - i - 1):
+                if func_value[j][0] > func_value[j + 1][0]:
                     t = func_value[j]
-                    func_value[j] = func_value[j+1]
-                    func_value[j+1] = t
+                    func_value[j] = func_value[j + 1]
+                    func_value[j + 1] = t
 
-                    t = individual_set[j]
-                    individual_set[j] = individual_set[j+1]
-                    individual_set[j+1] = t
+                    t = pso[j]
+                    pso[j] = pso[j + 1]
+                    pso[j + 1] = t
 
-        return individual_set, func_value
+        return pso, func_value
 
-    def get_front_best(self, individual_set):
+    def get_front_best(self, pso, func_value):
         """
         获取某一非支配层中最好的个体
 
-        :param individual_set: 某一非支配层个体集合
+        :param pso: 某一非支配层个体集合
         :return: 最好的个体
         """
-        # 计算每个个体的目标函数 1 和 目标函数 2 的值
-        func_value = []
-        for p in individual_set:
-            func_value.append((self.func_1(p), self.func_2(p)))
-
         # 按目标函数 1 的值升序排序
-        individual_set, func_value = self.sort(individual_set, func_value)
+        pso, func_value = self.sort(pso, func_value)
 
         # 计算每个个体的拥挤度
-        crowding_dis = [-1 for i in range(len(func_value))] # -1 代表拥挤度无穷大
-        for i, value in enumerate(func_value):
+        crowding_dis = [-1 for i in range(len(func_value))]  # -1 代表拥挤度无穷大
+        for i in range(len(func_value)):
             if i == 0 or i == len(func_value) - 1:
                 continue
             else:
-                crowding_dis[i] = ((value[i+1][0]-value[i-1][1])+(value[i+1][1]-value[i-1][1]))*2
+                crowding_dis[i] = ((func_value[i + 1][0] - func_value[i - 1][1]) + (func_value[i + 1][1] - func_value[i - 1][1])) * 2
 
         # 找到拥挤度最小值下标
         min_pos = 0
@@ -185,9 +235,9 @@ class mopso:
             if crowding_dis[i] < crowding_dis[min_pos]:
                 min_pos = i
 
-        return individual_set[min_pos]
+        return pso[min_pos]
 
-    def evolute(self, pso, max_steps=10):
+    def evolute(self, pso, max_steps=10, show_info=False):
         """
         粒子群优化算法
 
@@ -195,7 +245,6 @@ class mopso:
         :return: 进化后的粒子位置
         """
         max_steps = max_steps  # 最大迭代次数
-
         particle_dim = pso[0].shape  # 粒子的维度
         init_weight = 0.6  # 初始惯性权重与当前惯性权重
         end_weight = 0.1  # 结束惯性权重
@@ -203,18 +252,21 @@ class mopso:
 
         # 评估每个粒子并得到全局最优
         pBest = pso.copy()  # 存放每个粒子的历史最优位置，默认初始位置为最优位置
-        gBest = self.get_best(pBest)  # 获取这一届总体最优位置
+        pBest_func_value = [(self.func_1(u), self.func_2(u)) for u in pBest]    # 计算每个粒子的目标函数值
+        gBest = self.get_gBest(pBest, pBest_func_value)  # 获取这一届总体最优位置
 
         # 随机初始化每一个粒子的速度
         v = np.random.rand(particle_dim[0], particle_dim[1])
 
         # 迭代计算
-        iter = 0
+        if show_info:
+            print("开始进化")
         for step in range(max_steps):
-            iter += 1
+            if show_info:
+                print(step)
 
             # 计算本次迭代惯性因子
-            cur_weight = init_weight - (iter - 1) * (init_weight - end_weight) / (max_steps - 1)
+            cur_weight = init_weight - step * (init_weight - end_weight) / (max_steps - 1)
 
             # 生成两个随机数，分别代表飞向当前粒子历史最佳位置、全局历史最佳位置的程度
             r1 = np.random.rand(particle_dim[0], particle_dim[1])
@@ -234,11 +286,110 @@ class mopso:
             pso[pso < 0] = 0
 
             # 新位置不一定是好位置，还得和之前的个体粒子最优位置进行比较，比之前好才能更新
+            pso_func_value = [(self.func_1(u), self.func_2(u)) for u in pso]
             for i in range(len(pBest)):
-                pBest[i] = self.get_best([pBest[i], pso[i]])
-            gBest = self.get_best(pBest)
+                if self.compare(pBest_func_value[i], pso_func_value[i]) < 0:
+                    pBest[i] = pso[i].copy
 
-        return pso
+            # 获取全局最优位置
+            gBest_func_value = (self.func_1(gBest), self.func_2(gBest))
+            for i in range(len(pBest)):
+                if self.compare(pBest_func_value[i], gBest_func_value) > 0:
+                    gBest = pBest[i].copy()
+                    gBest_func_value = pBest_func_value[i]
+
+        # 对所有粒子求平均，这就是进化后的预测结果
+        y_prob = np.mean(pso, axis=0)
+
+        return y_prob
 
 
+def save_metric(history: dict, y_val, y_pred, y_proba):
+    if len(history.keys()) == 0:
+        history["val_acc"] = []
+        history["val_precision"] = []
+        history["val_recall"] = []
+        history["val_f1"] = []
+        history["auc_value"] = []
+        history["val_gmean"] = []
 
+    val_acc = metrics.accuracy_score(y_val, y_pred)
+    val_precision = metrics.precision_score(y_val, y_pred)
+    val_recall = metrics.recall_score(y_val, y_pred)
+    val_f1 = metrics.f1_score(y_val, y_pred)
+    auc_value = metrics.roc_auc_score(y_val, y_proba[:, 1])
+    val_gmean = mymetrics.gmean(y_val, y_pred)
+
+    # 存储结果
+    history["val_acc"].append(val_acc)
+    history["val_precision"].append(val_precision)
+    history["val_recall"].append(val_recall)
+    history["val_f1"].append(val_f1)
+    history["auc_value"].append(auc_value)
+    history["val_gmean"].append(val_gmean)
+
+
+def show_last_data(history):
+    print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f val_gmean:%.2f" %
+          (history["val_acc"][-1], history["val_precision"][-1],
+           history["val_recall"][-1], history["val_f1"][-1], history["auc_value"][-1],
+           history["val_gmean"][-1]))
+
+
+def show_mean_data(history):
+    s = ""
+    for k in history.keys():
+        s += "|%-20s" % ("%.4f ±%.4f" % (np.mean(history[k]), np.std(history[k])))
+    print(s)
+
+
+def kFoldEvolution(x, y):
+    # 记录评估结果
+    val_history = {}  # 进化前的预测结果
+    evo_history = {}  # 进化后的预测结果
+
+    kf = KFold(n_splits=5, shuffle=True)  # 混洗数据
+    cur_k = 0
+    for train_index, val_index in kf.split(x, y):
+        # 划分数据
+        cur_k += 1  # 当前第几折次交叉验证
+        x_train, y_train = x[train_index], y[train_index]
+        x_val, y_val = x[val_index], y[val_index]
+
+        # 分类器
+        # clf = KNeighborsClassifier()
+        clf = AdaSamplingBaggingClassifier(3)
+
+        # 训练
+        clf.fit(x_train, y_train)
+
+        # 测试
+        all_y_proba = clf.predict_proba_2(x_val)
+        y_proba = np.mean(all_y_proba, axis=0)
+        y_pred = np.argmax(y_proba, axis=1)
+
+        # 进化前的表现
+        save_metric(val_history, y_val, y_pred, y_proba)
+        print("进化前：")
+        show_last_data(val_history)
+
+        # 进化
+        y_proba = mopso(x_val).evolute(all_y_proba, max_steps=2, show_info=True)
+        y_pred = np.argmax(y_proba, axis=1)
+
+        # 进化后的表现
+        save_metric(evo_history, y_val, y_pred, y_proba)
+        print("进化后：")
+        show_last_data(evo_history)
+
+    # 统计，求平均值和标准差
+    print("进化前平均：")
+    show_mean_data(val_history)
+    print("进化后平均：")
+    show_mean_data(evo_history)
+
+
+if __name__ == '__main__':
+    x, y = read_data.get_data([0, 6], -1, "yeast.dat", show_info=True)
+
+    kFoldEvolution(x, y)
