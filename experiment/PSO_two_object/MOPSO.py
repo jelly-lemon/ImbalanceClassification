@@ -263,7 +263,11 @@ class mopso:
             print("开始进化")
         for step in range(max_steps):
             if show_info:
-                print(step)
+                if step == max_steps - 1:
+                    print("\r%d/%d" % (step+1, max_steps))
+                else:
+                    print("\r%d/%d" % (step+1, max_steps), end="")
+
 
             # 计算本次迭代惯性因子
             cur_weight = init_weight - step * (init_weight - end_weight) / (max_steps - 1)
@@ -299,10 +303,11 @@ class mopso:
                     gBest_func_value = pBest_func_value[i]
 
         # 对所有粒子求平均，这就是进化后的预测结果
-        y_prob = np.mean(pso, axis=0)
+        # y_prob = np.mean(pso, axis=0)
+        y_prob = np.mean(pBest, axis=0)
 
         return y_prob
-
+        # return gBest
 
 def save_metric(history: dict, y_val, y_pred, y_proba):
     if len(history.keys()) == 0:
@@ -330,10 +335,17 @@ def save_metric(history: dict, y_val, y_pred, y_proba):
 
 
 def show_last_data(history):
-    print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f val_gmean:%.2f" %
-          (history["val_acc"][-1], history["val_precision"][-1],
-           history["val_recall"][-1], history["val_f1"][-1], history["auc_value"][-1],
-           history["val_gmean"][-1]))
+    header = "|%-20s" % ""
+    value = "|%-20s" % ""
+    for key in history.keys():
+        header += "|%-20s" % key
+        value += "|%-20.2f" % history[key][-1]
+    print(header)
+    print(value)
+    # print("val_acc:%.2f val_precision:%.2f val_recall:%.2f val_f1:%.2f auc_value:%.2f val_gmean:%.2f" %
+    #       (history["val_acc"][-1], history["val_precision"][-1],
+    #        history["val_recall"][-1], history["val_f1"][-1], history["auc_value"][-1],
+    #        history["val_gmean"][-1]))
 
 
 def show_mean_data(history):
@@ -356,12 +368,15 @@ def kFoldEvolution(x, y):
         x_train, y_train = x[train_index], y[train_index]
         x_val, y_val = x[val_index], y[val_index]
 
+        # 打乱数据
+
+
         # 分类器
         # clf = KNeighborsClassifier()
         clf = AdaSamplingBaggingClassifier(3)
 
         # 训练
-        clf.fit(x_train, y_train)
+        clf.fit(x_train, y_train, sampling="under", show_info=True)
 
         # 测试
         all_y_proba = clf.predict_proba_2(x_val)
@@ -374,7 +389,7 @@ def kFoldEvolution(x, y):
         show_last_data(val_history)
 
         # 进化
-        y_proba = mopso(x_val).evolute(all_y_proba, max_steps=2, show_info=True)
+        y_proba = mopso(x_val).evolute(all_y_proba, max_steps=10, show_info=True)
         y_pred = np.argmax(y_proba, axis=1)
 
         # 进化后的表现
