@@ -2,7 +2,7 @@
 import random
 
 import numpy as np
-from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import SMOTE, BorderlineSMOTE
 from sklearn.neighbors import KNeighborsClassifier
 
 from myidea.MyRandomSampler import myRandomSampler
@@ -59,7 +59,8 @@ class AdaSamplingBaggingClassifier:
 
             for i in range(self.n_estimator):
                 sampling_rate = 1 + ((balance_rate-1) / self.n_estimator) * (i+1)
-                x_train, y_train = myRandomSampler().up_sampling(x, y, sampling_rate)
+                n_sampling = int(sampling_rate * len(y[y == 0]))
+                x_train, y_train = BorderlineSMOTE(sampling_strategy={0: n_sampling}).fit_resample(x, y)
                 if show_info:
                     print("当前采样率 %.4f" % sampling_rate)
                     IR = len(y_train[y_train == 1]) / len(y_train[y_train == 0])

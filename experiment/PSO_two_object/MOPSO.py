@@ -249,8 +249,8 @@ class mopso():
         max_steps = max_steps  # 最大迭代次数
         particle_dim = pso[0].shape  # 粒子的维度
         init_weight = 0.6  # 初始惯性权重与当前惯性权重
-        end_weight = 0.4  # 结束惯性权重
-        c1 = 1  # 个体学习因子
+        end_weight = 0.1  # 结束惯性权重
+        c1 = 2  # 个体学习因子
         c2 = 2  # 社会学习因子
 
         # 评估每个粒子并得到全局最优
@@ -288,8 +288,8 @@ class mopso():
 
             # 超出范围的粒子位置要进行限制
             # 预测概率不可能大于1，也不可能小于0
-            pso[pso > 1] = 1
-            pso[pso < 0] = 0
+            # pso[pso > 1] = 1
+            # pso[pso < 0] = 0
 
             # 新位置不一定是好位置，还得和之前的个体粒子最优位置进行比较，比之前好才能更新
             pso_func_value = [(self.func_1(u), self.func_2(u)) for u in pso]
@@ -310,7 +310,7 @@ class mopso():
 
         return y_prob
 
-def kFoldEvolution(x, y):
+def kFoldEvolution(x, y, evolution=False):
     # 记录评估结果
     val_history = {}  # 进化前的预测结果
     evo_history = {}  # 进化后的预测结果
@@ -328,7 +328,7 @@ def kFoldEvolution(x, y):
         # 分类器
         # clf = KNeighborsClassifier()
         #clf = AdaSamplingBaggingClassifier(3)
-        clf = hybridBaggingClassifier(3, 3)
+        clf = hybridBaggingClassifier(5, 5)
 
         # 训练
         #clf.fit(x_train, y_train, sampling="under", show_info=True)
@@ -339,29 +339,37 @@ def kFoldEvolution(x, y):
         y_proba = np.mean(all_y_proba, axis=0)
         y_pred = np.argmax(y_proba, axis=1)
 
-        # 进化前的表现
-        experiment_helper.save_metric(val_history, y_val, y_pred, y_proba)
-        print("进化前：")
-        experiment_helper.show_last_data(val_history)
+        if evolution:
+            # 进化前的表现
+            experiment_helper.save_metric(val_history, y_val, y_pred, y_proba)
+            print("进化前：")
+            experiment_helper.show_last_data(val_history)
 
-        # 进化
-        y_proba = mopso(x_val).evolute(all_y_proba, max_steps=50, show_info=True)
-        y_pred = np.argmax(y_proba, axis=1)
+            # 进化
+            y_proba = mopso(x_val).evolute(all_y_proba, max_steps=5, show_info=True)
+            y_pred = np.argmax(y_proba, axis=1)
 
-        # 进化后的表现
-        experiment_helper.save_metric(evo_history, y_val, y_pred, y_proba)
-        print("进化后：")
-        experiment_helper.show_last_data(evo_history)
-        print("-" * 60)
+            # 进化后的表现
+            experiment_helper.save_metric(evo_history, y_val, y_pred, y_proba)
+            print("进化后：")
+            experiment_helper.show_last_data(evo_history)
+            print("-" * 60)
+        else:
+            # 进化前的表现
+            experiment_helper.save_metric(val_history, y_val, y_pred, y_proba)
+            experiment_helper.show_last_data(val_history)
 
-    # 统计，求平均值和标准差
-    print("进化前平均：")
-    experiment_helper.show_mean_data(val_history)
-    print("进化后平均：")
-    experiment_helper.show_mean_data(evo_history)
+    if evolution:
+        # 统计，求平均值和标准差
+        print("进化前平均：")
+        experiment_helper.show_mean_data(val_history)
+        print("进化后平均：")
+        experiment_helper.show_mean_data(evo_history)
+    else:
+        experiment_helper.show_mean_data(val_history)
 
 
 if __name__ == '__main__':
     x, y = read_data.get_data([0, 6], -1, "yeast.dat", show_info=True)
 
-    kFoldEvolution(x, y)
+    kFoldEvolution(x, y, evolution=False)

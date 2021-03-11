@@ -3,6 +3,8 @@
 """
 
 import random
+
+import mymetrics
 from myidea.AdaSamplingBaggingClassifier import AdaSamplingBaggingClassifier
 from data import read_data
 import numpy as np
@@ -17,7 +19,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 
 from other_people.DBUSampler import DBUSampler
-from compare import mymetrics
+
 
 
 def get_balance(x, y):
@@ -70,6 +72,7 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
     val_history["val_f1"] = []
     val_history["auc_value"] = []
     val_history["val_gmean"] = []
+    val_history["bAcc"] = []
 
     # k折交叉
     kf = KFold(n_splits=k, shuffle=True)  # 混洗数据
@@ -137,6 +140,7 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
         val_f1 = metrics.f1_score(y_val, y_pred)
         auc_value = metrics.roc_auc_score(y_val, y_proba[:, 1])
         val_gmean = mymetrics.gmean(y_val, y_pred)
+        val_bAcc = metrics.balanced_accuracy_score(y_val, y_pred)
 
         # 存储评估结果
         val_history["val_acc"].append(val_acc)
@@ -145,6 +149,8 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
         val_history["val_f1"].append(val_f1)
         val_history["auc_value"].append(auc_value)
         val_history["val_gmean"].append(val_gmean)
+        val_history['bAcc'].append(val_bAcc)
+
 
         # 打印输出每折的评估情况
         if show_info:
@@ -173,7 +179,7 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
     for k in val_history.keys():
         t = "|%-20s" % ("%.4f ±%.4f" % (np.mean(val_history[k]), np.std(val_history[k])))
         all_data += t
-        if k in ("val_f1", "auc_value", "val_gmean"):
+        if k in ("val_f1", "auc_value", "val_gmean", "bAcc"):
             key_data += t
 
     if show_info:
@@ -187,21 +193,23 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
 def one_step():
     """
     一步到位运行所有对比方法
-
     """
-    x, y = read_data.get_data([3], -1, "page-blocks.dat", show_info=True)
+    x, y = read_data.get_data([0,6], -1, "yeast.dat", show_info=True)
 
-    k = 5
+    k = 5   # 交叉验证次数
+    # 期望每折交叉验证样本数量 >= 100
     while len(y) / k < 100:
         x, y = read_data.upsampling_copy(x, y, 1)
         print("复制一份后：%d/%d" % (len(y[y == 1]), len(y[y == 0])))
 
-    print("|%-20s|%-20s|%-20s|%-20s|" % ("", "f1score", "auc", "gmean"))
-    print("|%-20s|%-20s|%-20s|%-20s|" % ("----", "----", "----", "----"))
+    print("|%-20s|%-20s|%-20s|%-20s|%-20s" % ("", "f1score", "auc", "gmean", "bACC"))
+    print("|%-20s|%-20s|%-20s|%-20s|%-20s" % ("----", "----", "----", "----", "----"))
+
     method = ("KNN", "DT", "SVC", "RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging")
     for key in method:
         result = kFoldTest(x.copy(), y.copy(), sampler="", classifier=key, k=k)
-        print(result)
+        print(result[1])
+
 
 
 if __name__ == '__main__':
