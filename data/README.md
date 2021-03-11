@@ -21,6 +21,7 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 |glass-0	    |7	    |9	            |144/70=2.06    | 
 |tae-0	        |3	    |5	            |102/49=2.08    | 
 |titanic-1	    |2	    |3	            |188/90=2.10    | 
+|yeast-1        |10     |8              |1055/429=2.46  |
 |ecoli-1	    |8	    |7	            |259/77=3.36    | 
 |spectfheart-0	|2	    |44	            |212/55=3.85    | 
 |appendicitis-1	|2	    |7	            |85/21=4.05     |负样本数量较少

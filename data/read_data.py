@@ -272,7 +272,7 @@ def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False, need_cop
 
 if __name__ == '__main__':
     # 读取数据
-    x, y = get_data([0], -1, "vowel.dat", show_info=True)
+    x, y = get_data([1], -1, "yeast.dat", show_info=True)
 
 
     print(len(y[y == 0]))

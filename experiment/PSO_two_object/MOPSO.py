@@ -82,7 +82,13 @@ class mopso():
         mat = np.zeros((len(x), len(x)))
         for i, i_value in enumerate(x):
             for j, j_value in enumerate(x):
-                mat[i][j] = self.sim(i_value, j_value)
+                if i > j:
+                    mat[j][i] = mat[i][j] = self.sim(i_value, j_value)
+                elif i == j:
+                    mat[i][j] = 1
+                else:
+                    break
+
         return mat
 
     def get_r_matrix(self, cluster_result, n_cluster_center):
@@ -167,7 +173,10 @@ class mopso():
         sum = 0
         for i in range(n_sample):
             for j in range(n_sample):
-                sum += self.S[i][j] * np.linalg.norm(u[i] - u[j])
+                if i >= j:
+                    sum += self.S[i][j] * np.linalg.norm(u[i] - u[j])
+                else:
+                    break
         return sum
 
     def func_2(self, u):
@@ -187,6 +196,7 @@ class mopso():
         for i in range(n_sample):
             for j in range(n_cluster_center):
                 sum += r[i][j] * np.linalg.norm(u[i] - q[j])
+
         return sum
 
     def sort(self, pso, func_value):
@@ -288,8 +298,8 @@ class mopso():
 
             # 超出范围的粒子位置要进行限制
             # 预测概率不可能大于1，也不可能小于0
-            # pso[pso > 1] = 1
-            # pso[pso < 0] = 0
+            pso[pso > 1] = 1
+            pso[pso < 0] = 0
 
             # 新位置不一定是好位置，还得和之前的个体粒子最优位置进行比较，比之前好才能更新
             pso_func_value = [(self.func_1(u), self.func_2(u)) for u in pso]
@@ -370,6 +380,6 @@ def kFoldEvolution(x, y, evolution=False):
 
 
 if __name__ == '__main__':
-    x, y = read_data.get_data([0, 6], -1, "yeast.dat", show_info=True)
+    x, y = read_data.get_data([1], -1, "yeast.dat", show_info=True)
 
-    kFoldEvolution(x, y, evolution=False)
+    kFoldEvolution(x, y, evolution=True)

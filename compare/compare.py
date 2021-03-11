@@ -194,7 +194,7 @@ def one_step():
     """
     一步到位运行所有对比方法
     """
-    x, y = read_data.get_data([0,6], -1, "yeast.dat", show_info=True)
+    x, y = read_data.get_data([1], -1, "yeast.dat", show_info=True)
 
     k = 5   # 交叉验证次数
     # 期望每折交叉验证样本数量 >= 100
@@ -206,9 +206,15 @@ def one_step():
     print("|%-20s|%-20s|%-20s|%-20s|%-20s" % ("----", "----", "----", "----", "----"))
 
     method = ("KNN", "DT", "SVC", "RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging")
-    for key in method:
-        result = kFoldTest(x.copy(), y.copy(), sampler="", classifier=key, k=k)
-        print(result[1])
+    sampling = ("RUS", "SMOTE")
+    for m in method:
+        if m in ("KNN", "DT", "SVC"):
+            for s in sampling:
+                result = kFoldTest(x.copy(), y.copy(), sampler=s, classifier=m, k=k)
+                print(result[1])
+        else:
+            result = kFoldTest(x.copy(), y.copy(), sampler="", classifier=m, k=k)
+            print(result[1])
 
 
 
