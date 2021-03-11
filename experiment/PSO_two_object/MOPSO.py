@@ -324,6 +324,7 @@ def kFoldEvolution(x, y, evolution=False):
     # 记录评估结果
     val_history = {}  # 进化前的预测结果
     evo_history = {}  # 进化后的预测结果
+    mean_history = {}
 
     k = 5
     kf = KFold(n_splits=k, shuffle=True)  # 混洗数据
@@ -356,16 +357,24 @@ def kFoldEvolution(x, y, evolution=False):
             experiment_helper.show_last_data(val_history)
 
             # 进化
-            y_proba = mopso(x_val).evolute(all_y_proba, max_steps=5, show_info=True)
-            y_pred = np.argmax(y_proba, axis=1)
+            y_proba_evo = mopso(x_val).evolute(all_y_proba, max_steps=3, show_info=True)
+            y_pred_evo = np.argmax(y_proba_evo, axis=1)
 
             # 进化后的表现
-            experiment_helper.save_metric(evo_history, y_val, y_pred, y_proba)
+            experiment_helper.save_metric(evo_history, y_val, y_pred_evo, y_proba_evo)
             print("进化后：")
             experiment_helper.show_last_data(evo_history)
             print("-" * 60)
+
+            all_y_proba = [y_proba, y_proba_evo]
+            y_proba_mean = np.mean(all_y_proba, axis=0)
+            y_pred_mean = np.argmax(y_proba_mean, axis=1)
+            experiment_helper.save_metric(mean_history, y_val, y_pred_mean, y_proba_mean)
+            print("结合后：")
+            experiment_helper.show_last_data(mean_history)
+            print("-" * 60)
+
         else:
-            # 进化前的表现
             experiment_helper.save_metric(val_history, y_val, y_pred, y_proba)
             experiment_helper.show_last_data(val_history)
 
@@ -375,6 +384,8 @@ def kFoldEvolution(x, y, evolution=False):
         experiment_helper.show_mean_data(val_history)
         print("进化后平均：")
         experiment_helper.show_mean_data(evo_history)
+        print("结合后平均：")
+        experiment_helper.show_mean_data(mean_history)
     else:
         experiment_helper.show_mean_data(val_history)
 
