@@ -7,6 +7,7 @@
 
 """
 import numpy as np
+from sklearn import metrics
 from sklearn.cluster import KMeans
 from sklearn.model_selection import KFold
 
@@ -339,7 +340,7 @@ def kFoldEvolution(x, y, evolution=False):
         # 分类器
         # clf = KNeighborsClassifier()
         #clf = AdaSamplingBaggingClassifier(3)
-        clf = hybridBaggingClassifier(5, 5)
+        clf = hybridBaggingClassifier(20, 5)
 
         # 训练
         #clf.fit(x_train, y_train, sampling="under", show_info=True)
@@ -357,7 +358,7 @@ def kFoldEvolution(x, y, evolution=False):
             experiment_helper.show_last_data(val_history)
 
             # 进化
-            y_proba_evo = mopso(x_val).evolute(all_y_proba, max_steps=3, show_info=True)
+            y_proba_evo = mopso(x_val).evolute(all_y_proba, max_steps=5, show_info=True)
             y_pred_evo = np.argmax(y_proba_evo, axis=1)
 
             # 进化后的表现

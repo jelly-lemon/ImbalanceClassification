@@ -30,6 +30,8 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 |cleveland-1	|5	    |13	            |243/54=4.50    |
 
 
+
+
 ## 5 < IR <= 10
 |data sets              |class  |attributes     |IR             |Other
 |----                   |----   |----           |----           |----  
@@ -62,7 +64,6 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 ## 15 < IR <= 20
 |data sets  |class  |attributes |IR             |Other
 |----       |----   |----       |----           |----  
-|coil2000-1	|2	    |85	        |1418/90=15.76  |属性数量有点多 
 |ecoli-5	|8	    |7	        |316/20=15.80   | 
 |zoo-2	    |7	    |16	        |96/5=19.20     |样本数量太少了
 
@@ -119,4 +120,7 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 |data sets          |class  |attributes |IR             |Other
 |----               |----   |----       |----           |----  
 |winequality-red-3	|11	    |11	        |1589/10=158.90 |没有0，1，2这几个类
+
+## 黑名单
+|coil2000-1	|2	    |85	        |1418/90=15.76  |属性数量有点多 
 			
