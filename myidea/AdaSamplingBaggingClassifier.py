@@ -42,7 +42,7 @@ class AdaSamplingBaggingClassifier:
                 sampling_rate = start_sampling_rate - pow(2, i+1) / pow(2, self.n_estimator) * sampling_interval
 
                 # 基于密度采样
-                # x_train, y_train = DBUSampler(sampling_rate=sampling_rate, show_info=True).fit_resample(x, y)
+                # x_train, y_train = DBUSampler(sampling_rate=sampling_rate, show_info=False).fit_resample(x, y)
 
                 # 随机下采样，采样多数类
                 x_train, y_train = myRandomSampler().under_sampling(x, y, sampling_rate)

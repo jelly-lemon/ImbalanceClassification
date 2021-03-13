@@ -111,15 +111,15 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
             # probability=True 表示可以计算得到概率
             clf = SVC(probability=True)
         elif classifier in ("RandomForestClassifier", "RFC", "RandomForest"):
-            clf = RandomForestClassifier()
+            clf = RandomForestClassifier(n_estimators=3)
         elif classifier == "BaggingClassifier":
             clf = BaggingClassifier(base_estimator=KNeighborsClassifier(), bootstrap=True)
         elif classifier in ("AdaBoostClassifier", "AdaBoost"):
-            clf = AdaBoostClassifier()
+            clf = AdaBoostClassifier(n_estimators=2)
         elif classifier in ("EasyEnsembleClassifier", "EasyEnsemble"):
-            clf = EasyEnsembleClassifier()
+            clf = EasyEnsembleClassifier(n_estimators=1)
         elif classifier in ("BalancedBaggingClassifier", "BalancedBagging"):
-            clf = BalancedBaggingClassifier()
+            clf = BalancedBaggingClassifier(n_estimators=5)
         elif classifier == "AdaSamplingBaggingClassifier":
             clf = AdaSamplingBaggingClassifier(15)
 
@@ -205,10 +205,10 @@ def one_step():
     print("|%-20s|%-20s|%-20s|%-20s|%-20s" % ("", "f1score", "auc", "gmean", "bACC"))
     print("|%-20s|%-20s|%-20s|%-20s|%-20s" % ("----", "----", "----", "----", "----"))
 
-    method = ("KNN", "DT", "SVC", "RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging")
+    method = ("KNN", "DT", "RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging")
     sampling = ("RUS", "SMOTE")
     for m in method:
-        if m in ("KNN", "DT", "SVC"):
+        if m in ("KNN", "DT"):
             for s in sampling:
                 result = kFoldTest(x.copy(), y.copy(), sampler=s, classifier=m, k=k)
                 print(result[1])
