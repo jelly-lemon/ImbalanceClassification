@@ -61,7 +61,7 @@ class AdaSamplingBaggingClassifier:
                 print("采样前 IR=%.2f" % IR)
 
             for i in range(self.n_estimator):
-                sampling_rate = 1 + pow(2, i + 1) / pow(2, self.n_estimator) * sampling_interval
+                sampling_rate = 1 + math.log(i+1, self.n_estimator) * sampling_interval
                 n_sampling = int(sampling_rate * len(y[y == 0]))
                 x_train, y_train = BorderlineSMOTE(sampling_strategy={0: n_sampling}).fit_resample(x, y)
                 if show_info:

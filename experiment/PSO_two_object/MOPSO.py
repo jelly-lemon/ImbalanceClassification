@@ -340,7 +340,7 @@ def kFoldEvolution(x, y, evolution=False):
         # 分类器
         # clf = KNeighborsClassifier()
         #clf = AdaSamplingBaggingClassifier(3)
-        clf = hybridBaggingClassifier(10, 5)
+        clf = hybridBaggingClassifier(5, 10)
 
         # 训练
         #clf.fit(x_train, y_train, sampling="under", show_info=True)
@@ -392,6 +392,11 @@ def kFoldEvolution(x, y, evolution=False):
 
 
 if __name__ == '__main__':
-    x, y = read_data.get_data([1], -1, "yeast.dat", show_info=True)
+    x, y = read_data.get_data([3], -1, "page-blocks.dat", show_info=True)
+
+    # 期望每折交叉验证样本数量 >= 100
+    # for i in range(1):
+    #     x, y = read_data.upsampling_copy(x, y, 1)
+    #     print("复制一份后：%d/%d" % (len(y[y == 1]), len(y[y == 0])))
 
     kFoldEvolution(x, y, evolution=True)

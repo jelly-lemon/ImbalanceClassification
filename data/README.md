@@ -22,10 +22,10 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 |tae-0	        |3	    |5	            |102/49=2.08    | 
 |titanic-1	    |2	    |3	            |188/90=2.10    | 
 |yeast-1        |10     |8              |1055/429=2.46  |
-|ecoli-1	    |8	    |7	            |259/77=3.36    | 
-|spectfheart-0	|2	    |44	            |212/55=3.85    | 
+|ecoli-1	    |8	    |7	            |259/77=3.36    |
+|spectfheart-0	|2	    |44	            |212/55=3.85    |属性过多  
 |appendicitis-1	|2	    |7	            |85/21=4.05     |负样本数量较少
-|zoo-1	        |7	    |16	            |81/20=4.05     |
+|zoo-1	        |7	    |16	            |81/20=4.05     |数据太多简单
 |yeast-0-6	    |10	    |8	            |1205/279=4.32  |
 |cleveland-1	|5	    |13	            |243/54=4.50    |
 
@@ -39,19 +39,18 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 |hepatitis-0	        |2	    |19	            |67/13=5.15     |负样本数量太少
 |ecoli-7	            |8	    |7	            |284/52=5.46    |
 |newthyroid-0	        |3	    |5	            |185/30=6.17    | 
-|zoo-3	                |7	    |16	            |88/13=6.77     |
+|zoo-3	                |7	    |16	            |88/13=6.77     |数据太过简单
 |winequality-red-7	    |11	    |11	            |1400/199=7.04  |没有0，1，2这几个类
 |fertility-1	        |2	    |9	            |88/12=7.33     |负样本量有点少
 |cleveland-2	        |5	    |13	            |262/35=7.49    | 
 |ecoli-4	            |8	    |7	            |301/35=8.60    | 
 |page-blocks-1-2-3-4	|5	    |10	            |791/90=8.79    |
 |zoo-6	                |7	    |16	            |91/10=9.10     |负样本太少
-
+|vowel-0	            |11	    |13	        |900/90=10.00   |数据简单，分类容易
 
 ## 10 < IR <= 15
 |data sets          |class  |attributes |IR             |Other
 |----               |----   |----       |----           |----  
-|vowel-0	        |11	    |13	        |900/90=10.00   |数据简单，分类容易
 |ecoli-2-3-5-6	    |8	    |7	        |307/29=10.59   |                   
 |page-blocks-1-2-3	|5	    |10	        |1019/90=11.32  | 
 |glass-2	        |7	    |9	        |197/17=11.59   |负样本数量较少
@@ -98,7 +97,6 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 |data sets                  |class  |attributes |IR             |Other
 |----                       |----   |----       |----           |----  
 |yeast-6	                |10	    |8	        |1449/35=41.40  | 
-|winequality-red-8 vs. 6-7	|3	    |11	        |837/18=46.50   | 
 
 ## 60 < IR <= 65
 
@@ -109,7 +107,7 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 ## 65 < IR <= 70
 |data sets  |class  |attributes |IR             |Other
 |----       |----   |----       |----           |----  
-|ecoli-6	|8	    |7	        |331/5=66.20    |
+
 
 ## 80 < IR <= 100
 |data sets          |class  |attributes |IR             |Other

@@ -115,9 +115,9 @@ def kFoldTest(x, y, sampler, classifier, k=10, show_info=False):
         elif classifier == "BaggingClassifier":
             clf = BaggingClassifier(base_estimator=KNeighborsClassifier(), bootstrap=True)
         elif classifier in ("AdaBoostClassifier", "AdaBoost"):
-            clf = AdaBoostClassifier(n_estimators=2)
+            clf = AdaBoostClassifier(n_estimators=3)
         elif classifier in ("EasyEnsembleClassifier", "EasyEnsemble"):
-            clf = EasyEnsembleClassifier(n_estimators=1)
+            clf = EasyEnsembleClassifier(n_estimators=3)
         elif classifier in ("BalancedBaggingClassifier", "BalancedBagging"):
             clf = BalancedBaggingClassifier(n_estimators=5)
         elif classifier == "AdaSamplingBaggingClassifier":
@@ -194,13 +194,13 @@ def one_step():
     """
     一步到位运行所有对比方法
     """
-    x, y = read_data.get_data([1], -1, "yeast.dat", show_info=True)
+    x, y = read_data.get_data([6], -1, "ecoli.dat", show_info=True)
 
     k = 5   # 交叉验证次数
     # 期望每折交叉验证样本数量 >= 100
-    while len(y) / k < 100:
-        x, y = read_data.upsampling_copy(x, y, 1)
-        print("复制一份后：%d/%d" % (len(y[y == 1]), len(y[y == 0])))
+    # while len(y) / k < 100:
+    #     x, y = read_data.upsampling_copy(x, y, 1)
+    #     print("复制一份后：%d/%d" % (len(y[y == 1]), len(y[y == 0])))
 
     print("|%-20s|%-20s|%-20s|%-20s|%-20s" % ("", "f1score", "auc", "gmean", "bACC"))
     print("|%-20s|%-20s|%-20s|%-20s|%-20s" % ("----", "----", "----", "----", "----"))
