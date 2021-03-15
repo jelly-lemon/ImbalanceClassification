@@ -8,9 +8,9 @@ class hybridBaggingClassifier():
         self.under_classifier = AdaSamplingBaggingClassifier(n_undersampling_classifier)
         self.up_classifier = AdaSamplingBaggingClassifier(n_upsampling_classifier)
 
-    def fit(self, x, y):
-        self.under_classifier.fit(x, y, "under", show_info=True)
-        self.up_classifier.fit(x, y, "up", show_info=True)
+    def fit(self, x, y, show_info=False):
+        self.under_classifier.fit(x, y, "under", show_info=show_info)
+        self.up_classifier.fit(x, y, "up", show_info=show_info)
 
     def predict_proba_2(self, x):
         all_proba_1 = self.under_classifier.predict_proba_2(x)
