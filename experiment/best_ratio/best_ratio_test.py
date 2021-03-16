@@ -99,7 +99,7 @@ if __name__ == '__main__':
     N_up = (5, 10, 15, 20)
     for i in N_under:
         for j in N_up:
-            x, y = read_data.get_data([1], -1, "ecoli.dat", show_info=False)
+            x, y = read_data.get_data([6], -1, "yeast.dat", show_info=False)
 
             # 期望每折交叉验证样本数量 >= 100
             # for i in range(1):

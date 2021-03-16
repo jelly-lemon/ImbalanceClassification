@@ -32,7 +32,8 @@ def draw_hot(data, title="", save_name=""):
 
     if save_name != "":
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
-        plt.savefig(save_name, dpi=300, bbox_inches='tight')
+        plt.savefig(save_name+".png", dpi=300, bbox_inches='tight')
+        plt.savefig(save_name+".eps", dpi=300, bbox_inches='tight')
 
     plt.show()
 
@@ -63,10 +64,8 @@ def draw_bar():
 
 
 if __name__ == '__main__':
-    yeast_0_6 = [[0.9015, 0.8729, 0.9055, 0.8981],
-                 [0.9066, 0.8911, 0.9027, 0.8908],
-                 [0.8932, 0.8917, 0.8952, 0.8848],
-                 [0.8716, 0.8875, 0.8875, 0.8900]]
-
-    draw_hot(yeast_0_6, title="ecoli-1 IR=3.36", save_name="ecoli_1")
-
+    data = [[0.9289, 0.9351, 0.8829, 0.9296],
+[0.9483, 0.9169, 0.9138, 0.9287],
+[0.9323, 0.9077, 0.9353, 0.9216],
+[0.8625, 0.9170, 0.9163, 0.9184]]
+    draw_hot(data, title="yeast-6 1449/35=41.40", save_name="yeast_6")
