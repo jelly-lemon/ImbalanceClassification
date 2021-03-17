@@ -61,7 +61,7 @@ def show_last_data(history, blank_col=False):
     for key in history.keys():
         header += "|%-20s" % key
         split_line += "|%-20s" % "---"
-        value += "|%-20.2f" % history[key][-1]
+        value += "|%-20.4f" % history[key][-1]
     print(header)
     print(split_line)
     print(value)

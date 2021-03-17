@@ -340,7 +340,7 @@ def kFoldEvolution(x, y, evolution=False):
         # 分类器
         # clf = KNeighborsClassifier()
         #clf = AdaSamplingBaggingClassifier(3)
-        clf = hybridBaggingClassifier(5, 10)
+        clf = hybridBaggingClassifier(5, 15)
 
         # 训练
         #clf.fit(x_train, y_train, sampling="under", show_info=True)
