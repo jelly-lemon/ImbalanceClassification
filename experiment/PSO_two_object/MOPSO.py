@@ -344,7 +344,7 @@ def kFoldEvolution(x, y, evolution=False):
 
         # 训练
         #clf.fit(x_train, y_train, sampling="under", show_info=True)
-        clf.fit(x_train, y_train)
+        clf.fit(x_train, y_train, show_info=True)
 
         # 测试
         all_y_proba = clf.predict_proba_2(x_val)
@@ -392,7 +392,7 @@ def kFoldEvolution(x, y, evolution=False):
 
 
 if __name__ == '__main__':
-    x, y = read_data.get_data([3], -1, "page-blocks.dat", show_info=True)
+    x, y = read_data.get_data([6], -1, "yeast.dat", show_info=True)
 
     # 期望每折交叉验证样本数量 >= 100
     # for i in range(1):
