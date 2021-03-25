@@ -21,7 +21,8 @@ def shuffle_data(x, y):
 
     return x, y
 
-def upsampling_copy(x:np.array, y:np.array, times):
+
+def upsampling_copy(x: np.array, y: np.array, times):
     """
     所有数据拷贝几份，增加数据量
 
@@ -77,9 +78,10 @@ def upsampling_random(x, y, target_number=90):
     x = np.concatenate((np.array(x_pos), np.array(x_neg)))
     y = [1 for i in range(len(x_pos))] + [0 for i in range(len(x_neg))]
 
-    print("复制扩充后：%d/%d=%.2f" % (len(x_pos), len(x_neg), len(x_pos)/len(x_neg)))
+    print("复制扩充后：%d/%d=%.2f" % (len(x_pos), len(x_neg), len(x_pos) / len(x_neg)))
 
     return np.array(x), np.array(y)
+
 
 def list_dir(dir):
     dir_name = []
@@ -116,6 +118,7 @@ def get_file_path(file_name):
             return file_path
 
     raise FileNotFoundError(file_path, "不存在")
+
 
 def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False, need_copy=False):
     """
@@ -253,7 +256,6 @@ def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False, need_cop
     if shuffle:
         x, y = shuffle_data(x, y)
 
-
     # 转为数组
     x = np.array(x)
     y = np.array(y)
@@ -268,12 +270,10 @@ def get_data(neg_no, pos_no, file_name, shuffle=False, show_info=False, need_cop
     return x, y
 
 
-
-
 if __name__ == '__main__':
+    #---------------------------------------------
     # 读取数据
     x, y = get_data([1], -1, "yeast.dat", show_info=True)
-
 
     print(len(y[y == 0]))
     print(len(y[y == 1]))
