@@ -409,6 +409,78 @@ def fig_10():
     draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
                     save_name=save_name)
 
+def fig_11():
+    title = "Average F1-score on each data set"
+    y_label = "F1-score"
+    bar_legend = None
+    save_name = "Average_F1-score_Single"
+
+    # x 轴标签
+    x_tick_labels = ["RUS-KNN", "SMOTE-KNN", "RUS-DT", "SMOTE-DT", "HABC"]
+    # data[0]每个方法最优次数
+    y_data = [[0.817, 0.876, 0.839, 0.907, 0.928]]
+    # y_ticks = np.arange(0, 25, 2)
+    y_ticks = None
+
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+
+def fig_12():
+    title = "Average F1-score on each data set"
+    y_label = "F1-score"
+    bar_legend = None
+    save_name = "Average_F1-score_Ensemble"
+
+    # x 轴标签
+    x_tick_labels = ["RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging", "HABC"]
+    # data[0]每个方法最优次数
+    y_data = [[0.922, 0.922, 0.849, 0.888, 0.928]]
+    y_ticks = None
+
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+
+def fig_13():
+    title = "Average AUC on each data set"
+    y_label = "AUC"
+    bar_legend = None
+    save_name = "Average_AUC_Single"
+
+    # x 轴标签
+    x_tick_labels = ["RUS-KNN", "SMOTE-KNN", "RUS-DT", "SMOTE-DT", "HABC"]
+    # data[0]每个方法最优次数
+    y_data = [[0.801, 0.806, 0.772, 0.748, 0.868]]
+    # y_ticks = np.arange(0, 25, 2)
+    y_ticks = None
+
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+
+def fig_14():
+    title = "Average AUC on each data set"
+    y_label = "AUC"
+    bar_legend = None
+    save_name = "Average_AUC_Ensemble"
+
+    # x 轴标签
+    x_tick_labels = ["RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging", "HABC"]
+    # data[0]每个方法最优次数
+    y_data = [[0.790, 0.810, 0.833, 0.838, 0.868]]
+    y_ticks = None
+
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+
+def fig_15():
+    total_title = "The relationship between the number of iterations and AUC"
+    sub_title = ["yeast-0-6 IR=4", "ecoli-7 IR=5", "glass-2 IR=12", "yeast-4 IR=28"]
+    x_label = "number of iterations"
+    x_ticks = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
+    y_label = "AUC"
+    save_name = "iterations_and_AUC"
+
+    y_data = [[]]
+
 
 if __name__ == '__main__':
-    fig_10()
+    fig_14()
