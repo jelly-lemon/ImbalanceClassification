@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import seaborn as sns
 import numpy as np
 
@@ -199,15 +200,40 @@ def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None
     markers = ["^", "P", "x", "v", "p", "o", "s", "d", "D"]
     x_ticks = [i for i in range(len(x_tick_labels))]
     for i, data in enumerate(y_data):
-        # 第一个参数是横坐标，第二个参数纵坐标，第三个参数
+        # 第一个参数是横坐标，第二个参数纵坐标，第三个参数表示该数据的标签，legend 用得着
         plt.plot(x_ticks, data, marker=markers[i], label=line_labels[i])
-        plt.xticks(x_ticks, labels=x_tick_labels, rotation=90)
+
+    plt.xticks(x_ticks, labels=x_tick_labels, rotation=90)
     plt.legend(loc="best")
 
     if title is not None:
         plt.title(title)
     if y_label is not None:
         plt.ylabel(y_label)
+    if save_name is not None:
+        # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
+        plt.savefig("./png_img/" + save_name + ".png", dpi=300, bbox_inches='tight')
+        plt.savefig("./eps_img/" + save_name + ".eps", dpi=300, bbox_inches='tight')
+        plt.savefig("./svg_img/" + save_name + ".svg", dpi=300, bbox_inches='tight')
+
+    plt.show()
+
+
+def draw_some_line_chart(x_ticks, y_data, n_row, n_col, title, sub_title, x_label, y_label, save_name=None):
+    figure, axes = plt.subplots(n_row, n_col, figsize=(16, 6), constrained_layout=True)
+    for i in range(n_row):
+        for j in range(n_col):
+            axes[i][j].plot(x_ticks, y_data[n_col * i + j])
+            axes[i][j].set_title(sub_title[n_col * i + j])
+            axes[i][j].set_xlabel(x_label)
+            axes[i][j].set_ylabel(y_label)
+            axes[i][j].set_xticks(x_ticks)
+            # axes[i][j].set_ylim([0.9, 1])
+            axes[i][j].yaxis.set_major_formatter(mtick.FormatStrFormatter('%.4f'))
+
+    plt.suptitle(title, fontsize=16)
+
+
     if save_name is not None:
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
         plt.savefig("./png_img/" + save_name + ".png", dpi=300, bbox_inches='tight')
@@ -345,7 +371,8 @@ def fig_7():
                      "ecoli-4", "page-blo-1-2-3-4", "vowel-0", "ecoli-2-3-5-6", "page-blo-1-2-3", "glass-2",
                      "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1-4-5-8", "letter-img-1",
                      "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
-    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label, save_name=save_name)
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+                    save_name=save_name)
 
 
 def fig_8():
@@ -369,18 +396,26 @@ def fig_8():
                      "ecoli-4", "page-blo-1-2-3-4", "vowel-0", "ecoli-2-3-5-6", "page-blo-1-2-3", "glass-2",
                      "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1-4-5-8", "letter-img-1",
                      "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
-    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label, save_name=save_name)
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+                    save_name=save_name)
+
 
 def fig_9():
     """AUC"""
     title = "Performance on each dataset of single classifier and HABC "
     y_label = "AUC"
     save_name = "Performance_AUC_Single"
-    y_data = [[0.593, 0.841, 0.526, 0.754, 0.910, 0.844, 0.842, 0.466, 0.840, 0.897, 0.987, 0.644, 0.889, 0.963, 0.975, 0.896, 0.972, 0.896, 0.649, 0.733, 0.920, 0.615, 0.974, 0.891, 0.516, 0.536, 0.917, 0.959],
-              [0.653, 0.860, 0.618, 0.751, 0.926, 0.789, 0.832, 0.362, 0.807, 0.902, 0.969, 0.630, 0.863, 0.947, 1.000, 0.887, 0.965, 1.000, 0.573, 0.699, 0.962, 0.652, 0.996, 0.885, 0.491, 0.684, 0.897, 0.969],
-              [0.659, 0.773, 0.731, 0.643, 0.840, 0.766, 0.711, 0.461, 0.701, 0.834, 0.915, 0.616, 0.753, 0.927, 0.962, 0.797, 0.952, 0.954, 0.492, 0.679, 0.932, 0.693, 0.944, 0.835, 0.553, 0.719, 0.817, 0.969],
-              [0.639, 0.805, 0.704, 0.658, 0.793, 0.667, 0.706, 0.488, 0.718, 0.876, 0.909, 0.577, 0.705, 0.918, 0.976, 0.811, 0.944, 1.000, 0.453, 0.591, 0.966, 0.548, 0.908, 0.709, 0.533, 0.652, 0.767, 0.928],
-              [0.803, 0.842, 0.760, 0.857, 0.906, 0.828, 0.851, 0.684, 0.831, 0.934, 0.996, 0.738, 0.959, 0.980, 0.999, 0.927, 0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.507, 0.816, 0.942, 0.990]]
+    y_data = [
+        [0.593, 0.841, 0.526, 0.754, 0.910, 0.844, 0.842, 0.466, 0.840, 0.897, 0.987, 0.644, 0.889, 0.963, 0.975, 0.896,
+         0.972, 0.896, 0.649, 0.733, 0.920, 0.615, 0.974, 0.891, 0.516, 0.536, 0.917, 0.959],
+        [0.653, 0.860, 0.618, 0.751, 0.926, 0.789, 0.832, 0.362, 0.807, 0.902, 0.969, 0.630, 0.863, 0.947, 1.000, 0.887,
+         0.965, 1.000, 0.573, 0.699, 0.962, 0.652, 0.996, 0.885, 0.491, 0.684, 0.897, 0.969],
+        [0.659, 0.773, 0.731, 0.643, 0.840, 0.766, 0.711, 0.461, 0.701, 0.834, 0.915, 0.616, 0.753, 0.927, 0.962, 0.797,
+         0.952, 0.954, 0.492, 0.679, 0.932, 0.693, 0.944, 0.835, 0.553, 0.719, 0.817, 0.969],
+        [0.639, 0.805, 0.704, 0.658, 0.793, 0.667, 0.706, 0.488, 0.718, 0.876, 0.909, 0.577, 0.705, 0.918, 0.976, 0.811,
+         0.944, 1.000, 0.453, 0.591, 0.966, 0.548, 0.908, 0.709, 0.533, 0.652, 0.767, 0.928],
+        [0.803, 0.842, 0.760, 0.857, 0.906, 0.828, 0.851, 0.684, 0.831, 0.934, 0.996, 0.738, 0.959, 0.980, 0.999, 0.927,
+         0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.507, 0.816, 0.942, 0.990]]
     line_labels = ["RUS-KNN", "SMOTE-KNN", "RUS-DT", "SMOTE-DT", "HABC"]
     x_tick_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appendicitis-1",
                      "yeast-0-6", "cleveland-1", "yeast-0", "ecoli-7", "newthyroid-0", "cleveland-2",
@@ -390,15 +425,22 @@ def fig_9():
     draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
                     save_name=save_name)
 
+
 def fig_10():
     title = "Performance on each dataset of ensemble classifier and HABC "
     y_label = "AUC"
     save_name = "Performance_AUC_Ensemble"
-    y_data = [[0.661, 0.850, 0.641, 0.801, 0.895, 0.757, 0.768, 0.509, 0.778, 0.917, 0.951, 0.652, 0.874, 0.965, 0.982, 0.834, 0.954, 0.983, 0.474, 0.649, 0.999, 0.497, 0.964, 0.723, 0.575, 0.747, 0.751, 0.968],
-              [0.616, 0.837, 0.656, 0.792, 0.893, 0.743, 0.799, 0.537, 0.818, 0.906, 0.985, 0.677, 0.902, 0.930, 0.958, 0.906, 0.976, 0.899, 0.290, 0.782, 0.947, 0.667, 0.936, 0.903, 0.669, 0.793, 0.877, 0.991],
-              [0.693, 0.848, 0.669, 0.784, 0.874, 0.797, 0.832, 0.503, 0.826, 0.916, 0.992, 0.697, 0.869, 0.980, 0.996, 0.920, 0.984, 0.990, 0.374, 0.842, 0.985, 0.693, 0.983, 0.876, 0.713, 0.804, 0.917, 0.985],
-              [0.680, 0.889, 0.725, 0.771, 0.906, 0.788, 0.813, 0.501, 0.817, 0.917, 0.995, 0.756, 0.919, 0.982, 0.981, 0.928, 0.987, 0.990, 0.601, 0.753, 0.956, 0.643, 0.984, 0.874, 0.672, 0.753, 0.903, 0.985],
-              [0.803, 0.842, 0.760, 0.857, 0.906, 0.828, 0.851, 0.684, 0.831, 0.934, 0.996, 0.738, 0.959, 0.980, 0.999, 0.927, 0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.507, 0.816, 0.942, 0.990]]
+    y_data = [
+        [0.661, 0.850, 0.641, 0.801, 0.895, 0.757, 0.768, 0.509, 0.778, 0.917, 0.951, 0.652, 0.874, 0.965, 0.982, 0.834,
+         0.954, 0.983, 0.474, 0.649, 0.999, 0.497, 0.964, 0.723, 0.575, 0.747, 0.751, 0.968],
+        [0.616, 0.837, 0.656, 0.792, 0.893, 0.743, 0.799, 0.537, 0.818, 0.906, 0.985, 0.677, 0.902, 0.930, 0.958, 0.906,
+         0.976, 0.899, 0.290, 0.782, 0.947, 0.667, 0.936, 0.903, 0.669, 0.793, 0.877, 0.991],
+        [0.693, 0.848, 0.669, 0.784, 0.874, 0.797, 0.832, 0.503, 0.826, 0.916, 0.992, 0.697, 0.869, 0.980, 0.996, 0.920,
+         0.984, 0.990, 0.374, 0.842, 0.985, 0.693, 0.983, 0.876, 0.713, 0.804, 0.917, 0.985],
+        [0.680, 0.889, 0.725, 0.771, 0.906, 0.788, 0.813, 0.501, 0.817, 0.917, 0.995, 0.756, 0.919, 0.982, 0.981, 0.928,
+         0.987, 0.990, 0.601, 0.753, 0.956, 0.643, 0.984, 0.874, 0.672, 0.753, 0.903, 0.985],
+        [0.803, 0.842, 0.760, 0.857, 0.906, 0.828, 0.851, 0.684, 0.831, 0.934, 0.996, 0.738, 0.959, 0.980, 0.999, 0.927,
+         0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.507, 0.816, 0.942, 0.990]]
 
     line_labels = ["RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging", "HABC"]
     x_tick_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appendicitis-1",
@@ -408,6 +450,7 @@ def fig_10():
                      "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
     draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
                     save_name=save_name)
+
 
 def fig_11():
     title = "Average F1-score on each data set"
@@ -425,6 +468,7 @@ def fig_11():
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
+
 def fig_12():
     title = "Average F1-score on each data set"
     y_label = "F1-score"
@@ -439,6 +483,7 @@ def fig_12():
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+
 
 def fig_13():
     title = "Average AUC on each data set"
@@ -456,6 +501,7 @@ def fig_13():
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
+
 def fig_14():
     title = "Average AUC on each data set"
     y_label = "AUC"
@@ -471,16 +517,60 @@ def fig_14():
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
+
 def fig_15():
-    total_title = "The relationship between the number of iterations and AUC"
-    sub_title = ["yeast-0-6 IR=4", "ecoli-7 IR=5", "glass-2 IR=12", "yeast-4 IR=28"]
+    """
+    迭代次数与 F1-score
+    """
+    total_title = "The relationship between the number of iterations and F1-Score"
+    sub_title = ["yeast-0-6 IR=4", "ecoli-7 IR=5", "ecoli-4 IR=9", "glass-2 IR=12", "ecoli-5 IR=16", "yeast-4 IR=28"]
     x_label = "number of iterations"
-    x_ticks = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
+    x_ticks = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
+    y_label = "F1-Score"
+    save_name = "iterations_and_F1-Score"
+
+    y_data = [[0.8698, 0.8787, 0.8800, 0.8805, 0.8776, 0.8861, 0.8842, 0.8950, 0.8908, 0.8937, 0.8953, 0.8999, 0.8947,
+               0.8981, 0.8928, 0.8994, 0.8958, 0.8984, 0.8947, 0.8994, 0.8961],
+              [0.9262, 0.9491, 0.9381, 0.9155, 0.9462, 0.9462, 0.9569, 0.9581, 0.9635, 0.9539, 0.9569, 0.9550, 0.9581,
+               0.9519, 0.9581, 0.9550, 0.9562, 0.9555, 0.9550, 0.9555, 0.9585],
+              [0.9138, 0.9138, 0.9231, 0.9238, 0.9212, 0.9238, 0.9322, 0.9231, 0.9222, 0.9222, 0.9238, 0.9231, 0.9212,
+               0.9238, 0.9238, 0.9231, 0.9238, 0.9200, 0.9244, 0.9231, 0.9322],
+              [0.9739, 0.9731, 0.9731, 0.9787, 0.9751, 0.9851, 0.9867, 0.9887, 0.9851, 0.9851, 0.9887, 0.9887, 0.9887,
+               0.9867, 0.9820, 0.9867, 0.9867, 0.9851, 0.9811, 0.9800, 0.9850],
+              [0.9677, 0.9669, 0.9627, 0.9754, 0.9769, 0.9712, 0.9783, 0.9769, 0.9796, 0.9783, 0.9712, 0.9769, 0.9796,
+               0.9754, 0.9769, 0.9754, 0.9769, 0.9712, 0.9727, 0.9740, 0.9783],
+              [0.9643, 0.9771, 0.9754, 0.9754, 0.9719, 0.9735, 0.9789, 0.9701, 0.9735, 0.9718, 0.9718, 0.9718, 0.9736,
+               0.9754, 0.9719, 0.9754, 0.9807, 0.9842, 0.9789, 0.9735, 0.9754]]
+    draw_some_line_chart(x_ticks, y_data, 2, 3, title=total_title, sub_title=sub_title, x_label=x_label,
+                         y_label=y_label, save_name=save_name)
+
+
+def fig_16():
+    """
+    迭代次数与 AUC
+    """
+    total_title = "The relationship between the number of iterations and AUC"
+    sub_title = ["yeast-0-6 IR=4", "ecoli-7 IR=5", "ecoli-4 IR=9", "glass-2 IR=12", "ecoli-5 IR=16", "yeast-4 IR=28"]
+    x_label = "number of iterations"
+    x_ticks = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
     y_label = "AUC"
     save_name = "iterations_and_AUC"
+    y_data = [[0.8249, 0.8017, 0.8274, 0.8297, 0.8344, 0.8462, 0.8446, 0.8434, 0.8443, 0.8423, 0.8427, 0.8451, 0.8448,
+               0.8455, 0.8477, 0.8447, 0.8411, 0.8417, 0.8410, 0.8458, 0.8427],
+              [0.9327, 0.9229, 0.9276, 0.9321, 0.9351, 0.9341, 0.9301, 0.9323, 0.9301, 0.9306, 0.9376, 0.9355, 0.9346,
+               0.9331, 0.9339, 0.9377, 0.9360, 0.9369, 0.9398, 0.9383, 0.9332],
+              [0.8938, 0.8952, 0.9167, 0.9167, 0.9241, 0.9232, 0.9262, 0.9255, 0.9194, 0.9255, 0.9298, 0.9267, 0.9232,
+               0.9209, 0.9228, 0.9235, 0.9201, 0.9235, 0.9247, 0.9282, 0.9259],
+              [0.9903, 0.9913, 0.9956, 0.9933, 0.9938, 0.9936, 0.9933, 0.9928, 0.9992, 0.9976, 0.9949, 0.9987, 0.9972,
+               0.9962, 0.9969, 0.9926, 0.9982, 0.9996, 0.9990, 0.9949, 0.9954],
+              [0.9589, 0.9614, 0.9632, 0.9677, 0.9729, 0.9639, 0.9674, 0.9624, 0.9643, 0.9680, 0.9613, 0.9609, 0.9698,
+               0.9651, 0.9659, 0.9639, 0.9676, 0.9646, 0.9687, 0.9636, 0.9631],
+              [0.9075, 0.9059, 0.9045, 0.9080, 0.9157, 0.9146, 0.9178, 0.9209, 0.9204, 0.9186, 0.9206, 0.9232, 0.9171,
+               0.9179, 0.9129, 0.9168, 0.9111, 0.9146, 0.9180, 0.9180, 0.9163]]
 
-    y_data = [[]]
+    draw_some_line_chart(x_ticks, y_data, 2, 3, title=total_title, sub_title=sub_title, x_label=x_label,
+                         y_label=y_label, save_name=save_name)
 
 
 if __name__ == '__main__':
-    fig_14()
+    fig_16()

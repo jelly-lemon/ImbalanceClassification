@@ -250,7 +250,7 @@ class mopso():
 
         return pso[min_pos]
 
-    def evolute(self, pso, max_steps=10, show_info=False):
+    def evolute(self, pso, max_steps=10, show_info=False, y_val=None):
         """
         粒子群优化算法
 
@@ -263,6 +263,7 @@ class mopso():
         end_weight = 0.1  # 结束惯性权重
         c1 = 2  # 个体学习因子
         c2 = 2  # 社会学习因子
+        evolute_history = {}
 
         # 评估每个粒子并得到全局最优
         pBest = pso.copy()  # 存放每个粒子的历史最优位置，默认初始位置为最优位置
@@ -315,6 +316,15 @@ class mopso():
                     gBest = pBest[i].copy()
                     gBest_func_value = pBest_func_value[i]
 
+            if (step+1) % 5 == 0:
+                if show_info:
+                    print("step = %d" % (step+1))
+                    y_proba_evo = np.mean(pso, axis=0)
+                    y_pred_evo = np.argmax(y_proba_evo, axis=1)
+                    experiment_helper.save_metric(evolute_history, y_val, y_pred_evo, y_proba_evo)
+                    experiment_helper.show_last_data(evolute_history)
+
+
         # 对所有粒子求平均，这就是进化后的预测结果
         y_prob = np.mean(pso, axis=0)
         # y_prob = np.mean(pBest, axis=0)
@@ -358,7 +368,7 @@ def kFoldEvolution(x, y, evolution=False):
             experiment_helper.show_last_data(val_history)
 
             # 进化
-            y_proba_evo = mopso(x_val).evolute(all_y_proba, max_steps=5, show_info=True)
+            y_proba_evo = mopso(x_val).evolute(all_y_proba, max_steps=100, show_info=True, y_val=y_val)
             y_pred_evo = np.argmax(y_proba_evo, axis=1)
 
             # 进化后的表现
@@ -392,7 +402,7 @@ def kFoldEvolution(x, y, evolution=False):
 
 
 if __name__ == '__main__':
-    x, y = read_data.get_data([6], -1, "yeast.dat", show_info=True)
+    x, y = read_data.get_data([4], -1, "yeast.dat", show_info=True)
 
     # 期望每折交叉验证样本数量 >= 100
     # for i in range(1):
