@@ -124,6 +124,8 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     if y_ticks is not None:
         plt.yticks(y_ticks)
 
+    plt.grid(axis='y', linestyle='--') # 设置网格线
+
     # 开始画每组数据
     draw_point = []  # 每组数据中每条画点
     point = bar_width / 2
@@ -133,9 +135,13 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
         draw_point.append(point)
     draw_point = np.array(draw_point)
 
+    my_color = ['lightgrey', 'darkgrey', 'grey', 'dimgrey', 'black']
+    # my_color = ['lightgrey', 'darkgrey', 'grey', 'dimgrey', 'black']
+
     all_bar = []
     for i, height in enumerate(y_data):
-        bar = plt.bar(x=draw_point, width=bar_width, height=height)
+        bar = plt.bar(x=draw_point, width=bar_width, height=height,
+                      color=my_color, edgecolor='black') # 绘制条状图
         draw_point += unit_inner_space + bar_width
         all_bar.append(bar)
 
@@ -633,4 +639,4 @@ def fig_18():
 
 
 if __name__ == '__main__':
-    fig_17()
+    fig_6()
