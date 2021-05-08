@@ -1,7 +1,14 @@
 import matplotlib.pyplot as plt
+# plt.style.use('ggplot') # 图像风格
 import matplotlib.ticker as mtick
 import seaborn as sns
 import numpy as np
+
+data_name = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appen-1",
+             "yeast-06", "cleve-1", "yeast-0", "ecoli-7", "newth-0", "cleve-2",
+             "ecoli-4", "page-1234", "vowel-0", "ecoli-2356", "page-123", "glass-2",
+             "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1458", "letter-1",
+             "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-3"]
 
 
 def draw_box(x, y, title):
@@ -104,7 +111,7 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     """
     条形图
     """
-    bar_width = 3  # 条状图高度
+    bar_width = 10  # 条状图高度
     unit_inner_space = 0.5  # 单元内间距
     unit_outer_space = 4  # 单元间间距
 
@@ -124,9 +131,10 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     if y_ticks is not None:
         plt.yticks(y_ticks)
 
-    plt.grid(axis='y', linestyle='--') # 设置网格线
+    # 设置网格线
+    plt.grid(axis='y', linestyle='--')
 
-    # 开始画每组数据
+    # 计算起始绘制位置
     draw_point = []  # 每组数据中每条画点
     point = bar_width / 2
     draw_point.append(point)
@@ -135,28 +143,37 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
         draw_point.append(point)
     draw_point = np.array(draw_point)
 
+    # 每组数据的颜色
     my_color = ['lightgrey', 'darkgrey', 'grey', 'dimgrey', 'black']
-    # my_color = ['lightgrey', 'darkgrey', 'grey', 'dimgrey', 'black']
+    # my_color = ['lightgrey', 'dimgrey']
 
+    # 绘制条状图
     all_bar = []
     for i, height in enumerate(y_data):
         bar = plt.bar(x=draw_point, width=bar_width, height=height,
-                      color=my_color, edgecolor='black') # 绘制条状图
-        draw_point += unit_inner_space + bar_width
+                      color=my_color, edgecolor='black', zorder=9)  # 绘制条状图，zorder 越大，表示绘制顺序越靠后，就会覆盖之前内容
+        # 绘制注释文字
+        for xy in zip(draw_point, height):
+            plt.annotate(xy[1], xy=xy, xytext=(-12, 2), textcoords='offset points')
+        draw_point += unit_inner_space + bar_width  # 下次绘制起始位置
         all_bar.append(bar)
 
+    # 图例
     if bar_legend is not None:
         plt.legend(all_bar, bar_legend, loc="best")  # 还有 upper right 等
 
+    # 标题
     if title is not None:
         plt.title(title)
 
+    # 保存文件
     if save_name is not None:
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
         plt.savefig("./png_img/" + save_name + ".png", dpi=300, bbox_inches='tight')
         plt.savefig("./eps_img/" + save_name + ".eps", dpi=300, bbox_inches='tight')
         plt.savefig("./svg_img/" + save_name + ".svg", dpi=300, bbox_inches='tight')
 
+    # 立即显示图片
     plt.show()
 
 
@@ -164,6 +181,12 @@ def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None
     """
     折线图
     """
+    # 设置图片比例
+    plt.figure(figsize=(24, 9))
+
+    # 网格线
+    plt.grid(axis='y', linestyle='--')
+
     markers = ["^", "P", "x", "v", "p", "o", "s", "d", "D"]
     x_ticks = [i for i in range(len(x_tick_labels))]
     for i, data in enumerate(y_data):
@@ -222,19 +245,18 @@ def fig_1():
     save_name = "Number_of_sample"
 
     # x 轴标签
-    x_tick_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appendicitis-1",
-                     "yeast-0-6", "cleveland-1", "yeast-0", "ecoli-7", "newthyroid-0", "cleveland-2",
-                     "ecoli-4", "page-blo-1-2-3-4", "vowel-0", "ecoli-2-3-5-6", "page-blo-1-2-3", "glass-2",
-                     "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1-4-5-8", "letter-img-1",
-                     "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
+    x_tick_labels = data_name
+
     # data[0]正样本数量，data[1]负样本数量
     y_data = [
         [153, 144, 102, 1055, 259, 85, 1205, 243, 457, 284, 185, 262, 301, 791, 900, 307, 5028, 197, 576, 429, 316, 663,
          2259, 1433, 1546, 638, 1449, 5385],
         [90, 70, 49, 429, 77, 21, 279, 54, 90, 52, 30, 35, 35, 90, 90, 29, 444, 17, 49, 30, 20, 30, 90, 51, 53, 18, 35,
          87]]
+
+
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, title=title, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=90)
 
 
 def fig_2():
@@ -247,11 +269,7 @@ def fig_2():
     save_name = "Number_of_attributes"
 
     # x 轴标签
-    x_tick_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appendicitis-1",
-                     "yeast-0-6", "cleveland-1", "yeast-0", "ecoli-7", "newthyroid-0", "cleveland-2",
-                     "ecoli-4", "page-blo-1-2-3-4", "vowel-0", "ecoli-2-3-5-6", "page-blo-1-2-3", "glass-2",
-                     "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1-4-5-8", "letter-img-1",
-                     "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
+    x_tick_labels = data_name
     # data[0]每个类属性数量
     y_data = [[10, 9, 5, 8, 7, 7, 8, 13, 8, 7, 5, 13, 7, 10, 13, 7, 10, 9, 4, 8, 7, 8, 16, 8, 11, 2, 10, 5]]
 
@@ -489,7 +507,6 @@ def fig_12():
 def fig_13():
     """
     单分类器平均 AUC
-    :return:
     """
     title = "Average AUC on each data set"
     y_label = "AUC"
@@ -586,10 +603,10 @@ def fig_17():
     """
     title = "Comparison of F1-Score before and after evolution"
     save_name = "F1-Score_Comparison_evolution"
-    x_label = "F1-Score"
+    y_label = "F1-Score"
 
     # data[0] 是进化前，data[1] 是进化后
-    data = [[0.7842, 0.8612, 0.8081, 0.8362, 0.8920, 0.8824, 0.8698, 0.7713, 0.9004,
+    y_data = [[0.7842, 0.8612, 0.8081, 0.8362, 0.8920, 0.8824, 0.8698, 0.7713, 0.9004,
              0.9262, 0.9663, 0.8682, 0.9138, 0.9670, 0.9972, 0.9455, 0.9746, 0.9739,
              0.8536, 0.9330, 0.9677, 0.9122, 0.9801, 0.9643, 0.9199, 0.9624, 0.9878,
              0.9868],
@@ -598,16 +615,11 @@ def fig_17():
              0.8695, 0.9458, 0.9756, 0.9353, 0.9899, 0.9723, 0.9593, 0.9683, 0.9895,
              0.9940]]
 
-    # 数据集标签
-    y_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appen-1",
-                "yeast-06", "cleve-1", "yeast-0", "ecoli-7", "newth-0", "cleve-2",
-                "ecoli-4", "page-1234", "vowel-0", "ecoli-2356", "page-123", "glass-2",
-                "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1458", "letter-1",
-                "yeast-4", "wine-4", "wine-8vs.6", "yeast-6", "page-3"]
+    line_labels = ["before", "after optimized"]
+    x_tick_labels = data_name
 
-    bar_legend = ["Before optimization", "After optimization"]
-    draw_barh(y_tick_labels=y_labels, x_data=data, save_name=save_name, title=title, x_label=x_label,
-              bar_legend=bar_legend)
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+                    save_name=save_name)
 
 
 def fig_18():
@@ -616,10 +628,11 @@ def fig_18():
     """
     title = "Comparison of AUC before and after evolution"
     save_name = "AUC_Comparison_evolution"
-    x_label = "AUC"
+    y_label = "AUC"
+
 
     # data[0] 是进化前，data[1] 是进化后
-    data = [[0.7890, 0.8351, 0.7266, 0.8323, 0.9019, 0.8082, 0.8249, 0.6738, 0.8296, 0.9327,
+    y_data = [[0.7890, 0.8351, 0.7266, 0.8323, 0.9019, 0.8082, 0.8249, 0.6738, 0.8296, 0.9327,
              0.9909, 0.7289, 0.8938, 0.9772, 0.9994, 0.9204, 0.9732, 0.9903, 0.7007, 0.8475,
              0.9589, 0.7007, 0.9884, 0.9075, 0.4934, 0.7994, 0.9441, 0.9733],
             [0.8027, 0.8474, 0.7530, 0.8568, 0.9090, 0.8065, 0.8423, 0.7078, 0.8321, 0.9392,
@@ -627,16 +640,12 @@ def fig_18():
              0.9605, 0.7038, 0.9894, 0.9119, 0.5079, 0.8012, 0.9472, 0.9840]]
 
     # 数据集标签
-    y_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appen-1",
-                "yeast-06", "cleve-1", "yeast-0", "ecoli-7", "newth-0", "cleve-2",
-                "ecoli-4", "page-1234", "vowel-0", "ecoli-2356", "page-123", "glass-2",
-                "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1458", "letter-1",
-                "yeast-4", "wine-4", "wine-8vs.6", "yeast-6", "page-3"]
+    line_labels = ["before", "after optimized"]
+    x_tick_labels = data_name
 
-    bar_legend = ["Before optimization", "After optimization"]
-    draw_barh(y_tick_labels=y_labels, x_data=data, save_name=save_name, title=title, x_label=x_label,
-              bar_legend=bar_legend)
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+                    save_name=save_name)
 
 
 if __name__ == '__main__':
-    fig_6()
+    fig_10()
