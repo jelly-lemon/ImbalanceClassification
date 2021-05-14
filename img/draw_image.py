@@ -7,8 +7,17 @@ import numpy as np
 data_name = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appen-1",
              "yeast-06", "cleve-1", "yeast-0", "ecoli-7", "newth-0", "cleve-2",
              "ecoli-4", "page-1234", "vowel-0", "ecoli-2356", "page-123", "glass-2",
-             "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1458", "letter-1",
-             "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-3"]
+             "balance-1", "yst-7vs.1", "ecoli-5", "yst-7v1458", "letter-1",
+             "yeast-4", "wine-4", "wine-8vs.6", "yeast-6", "page-3"]
+
+font1 = {'family': 'Times New Roman',
+         'weight': 'normal',
+         'size': 12,
+         }
+font2_bold = {'family': 'Times New Roman',
+         'weight': 'bold',
+         'size': 16,
+         }
 
 
 def draw_box(x, y, title):
@@ -112,14 +121,20 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     """
     条形图
     """
+    #
     # 设置图片比例
-    plt.figure(figsize=(20, 9))
+    #
+    plt.figure(figsize=(12, 9))
 
     bar_width = 10  # 条状图高度
     unit_inner_space = 1  # 单元内间距
     unit_outer_space = 4  # 单元间间距
 
+
+
+    #
     # y 轴上标签位置
+    #
     unit_width = bar_width * len(y_data) + unit_inner_space * (len(y_data) - 1)
     total_width = unit_width * len(y_data[0]) + unit_outer_space * (len(y_data[0]) - 1)
     x_label_ticks = []
@@ -128,17 +143,21 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     for i in range(len(y_data[0]) - 1):
         label_tick += unit_outer_space + unit_width
         x_label_ticks.append(label_tick)
-    # plt.xlim([0.45, 1.2])
+    # plt.xlim([0.45, 1.2]) # 设置 y 轴刻度
     if y_label is not None:
-        plt.ylabel(y_label)
-    plt.xticks(ticks=x_label_ticks, labels=x_tick_labels, rotation=30, fontsize=8)
+        plt.ylabel(y_label, fontdict=font2_bold)
+    plt.xticks(ticks=x_label_ticks, labels=x_tick_labels, rotation=x_label_rotation, fontproperties=font2_bold)
     if y_ticks is not None:
-        plt.yticks(y_ticks)
+        plt.yticks(y_ticks, fontsize=12, fontproperties='Times New Roman')
 
-    # 设置网格线
+    #
+    # 设置背景网格线
+    #
     plt.grid(axis='y', linestyle='--')
 
-    # 计算起始绘制位置
+    #
+    # 计算横坐标起始绘制位置
+    #
     draw_point = []  # 每组数据中每条画点
     point = bar_width / 2
     draw_point.append(point)
@@ -147,50 +166,70 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
         draw_point.append(point)
     draw_point = np.array(draw_point)
 
+    #
     # 每组数据的颜色
+    #
     # my_color = ['lightgrey', 'darkgrey', 'grey', 'dimgrey', 'black']
     # my_color = ['lightgrey', 'dimgrey']
     # my_color = ['white', 'darkgrey']
     my_color = ['white']
 
+    #
     # 填充物
+    #
     patterns = ('-', '+', 'x', '\\', '*', 'o', 'O', '.')
+    patterns = (' ', '//')
 
     # 绘制条状图
     all_bar = []
     for i, height in enumerate(y_data):
         # 需要颜色就添加 color=my_color 参数
-
         # 填充物  hatch=patterns，每组数据一种填充类型
-        # 为了绘制每一个“条”都有填充物，这里又加了一个 for 循环
+        # bar = plt.bar(x=draw_point, width=bar_width, height=height,
+        #               hatch=patterns[i],
+        #               color=my_color,
+        #               edgecolor='black', zorder=9)
+        #
+        # 为了绘制每一个“条”都有填充物，这里用一个 for 循环
+        #
         for j, h in enumerate(height):
             bar = plt.bar(x=draw_point[j], width=bar_width, height=height[j],
-                          hatch=patterns[j],
+                          hatch=patterns[j%2],
                           color=my_color,
                           edgecolor='black', zorder=9)  # 绘制条状图，zorder 越大，表示绘制顺序越靠后，就会覆盖之前内容，用于覆盖虚线
 
         # 绘制注释文字
+        #
         for xy in zip(draw_point, height):
-            plt.annotate(xy[1], xy=xy, xytext=(-12, 2), textcoords='offset points')
+            plt.annotate(xy[1], xy=xy, xytext=(-10, 2), textcoords='offset points', fontsize=12, fontproperties='Times New Roman')
         draw_point += unit_inner_space + bar_width  # 下次绘制起始位置
         all_bar.append(bar)
 
+    #
     # 图例
+    #
     if bar_legend is not None:
-        plt.legend(all_bar, bar_legend, loc="best")  # 还有 upper right 等
+        plt.legend(all_bar, bar_legend, loc="best", prop=font2_bold)  # 还有 upper right 等
 
+    #
     # 标题
+    #
     if title is not None:
         plt.title(title)
 
+    #
     # 保存文件
+    #
+    plt.tight_layout() # 自动调整布局
     if save_name is not None:
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
         plt.savefig("./png_img/" + save_name + ".png", dpi=300, bbox_inches='tight')
         plt.savefig("./eps_img/" + save_name + ".eps", dpi=300, bbox_inches='tight')
         plt.savefig("./svg_img/" + save_name + ".svg", dpi=300, bbox_inches='tight')
 
+    #
     # 立即显示图片
+    #
     plt.show()
 
 
@@ -205,19 +244,25 @@ def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None
     plt.grid(axis='y', linestyle='--')
 
     markers = ["^", "P", "x", "v", "p", "o", "s", "d", "D"]
+
+    # 折线风格
+    line_style = ['-', '--', '-.', ':', '-', '--']
+
+    line_color = ['red', 'green']
+
     x_ticks = [i for i in range(len(x_tick_labels))]
     for i, data in enumerate(y_data):
         # 第一个参数是横坐标，第二个参数纵坐标，第三个参数表示该数据的标签，legend 用得着
-        plt.plot(x_ticks, data, marker=markers[i], label=line_labels[i], linewidth=2,
-                 markersize=10)
+        plt.plot(x_ticks, data, marker=markers[i], label=line_labels[i], linewidth=3,
+                 markersize=16, linestyle=line_style[i], color=line_color[i])
 
-    plt.xticks(x_ticks, labels=x_tick_labels, rotation=30)
-    plt.legend(loc="best")
+    plt.xticks(x_ticks, labels=x_tick_labels, rotation=30, fontproperties=font2_bold)
+    plt.legend(loc="best", prop=font2_bold)
 
     if title is not None:
         plt.title(title)
     if y_label is not None:
-        plt.ylabel(y_label)
+        plt.ylabel(y_label,  fontdict=font2_bold)
     if save_name is not None:
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
         plt.savefig("./png_img/" + save_name + ".png", dpi=300, bbox_inches='tight')
@@ -258,8 +303,8 @@ def fig_1():
     各数据集正负样本数量对比条状图
     """
     title = "Number of positive and negative samples in each dataset"
-    y_label = "Number of samples"
-    bar_legend = ["Number of positive samples", "Number of negative samples"]
+    y_label = "number of samples"
+    bar_legend = ["number of positive samples", "number of negative samples"]
     save_name = "Number_of_sample"
 
     # x 轴标签
@@ -272,8 +317,7 @@ def fig_1():
         [90, 70, 49, 429, 77, 21, 279, 54, 90, 52, 30, 35, 35, 90, 90, 29, 444, 17, 49, 30, 20, 30, 90, 51, 53, 18, 35,
          87]]
 
-
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=90)
 
 
@@ -291,7 +335,7 @@ def fig_2():
     # data[0]每个类属性数量
     y_data = [[10, 9, 5, 8, 7, 7, 8, 13, 8, 7, 5, 13, 7, 10, 13, 7, 10, 9, 4, 8, 7, 8, 16, 8, 11, 2, 10, 5]]
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name)
 
 
@@ -300,7 +344,7 @@ def fig_3():
     单分类器最优 F1-Score 出现次数
     """
     title = "Times of optimal F1-Score"
-    y_label = "times"
+    y_label = "times of optimal F1-Score"
     bar_legend = None
     save_name = "Times_of_optimal_F1-Score_Single"
 
@@ -310,7 +354,7 @@ def fig_3():
     y_data = [[0, 2, 0, 3, 23]]
     y_ticks = np.arange(0, 25, 2)
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
 
@@ -328,7 +372,7 @@ def fig_4():
     y_data = [[8, 6, 0, 1, 13]]
     y_ticks = np.arange(0, 20, 2)
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
              save_name=save_name, x_label_rotation=0)
 
 
@@ -499,7 +543,7 @@ def fig_11():
     # y_ticks = np.arange(0, 25, 2)
     y_ticks = None
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
 
@@ -518,7 +562,7 @@ def fig_12():
     y_data = [[0.922, 0.922, 0.849, 0.888, 0.928]]
     y_ticks = None
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
 
@@ -625,18 +669,18 @@ def fig_17():
 
     # data[0] 是进化前，data[1] 是进化后
     y_data = [[0.7842, 0.8612, 0.8081, 0.8362, 0.8920, 0.8824, 0.8698, 0.7713, 0.9004,
-             0.9262, 0.9663, 0.8682, 0.9138, 0.9670, 0.9972, 0.9455, 0.9746, 0.9739,
-             0.8536, 0.9330, 0.9677, 0.9122, 0.9801, 0.9643, 0.9199, 0.9624, 0.9878,
-             0.9868],
-            [0.7975, 0.8672, 0.8114, 0.8424, 0.9023, 0.8824, 0.8746, 0.7955, 0.9087,
-             0.9305, 0.9790, 0.8784, 0.9221, 0.9713, 0.9978, 0.9655, 0.9845, 0.9831,
-             0.8695, 0.9458, 0.9756, 0.9353, 0.9899, 0.9723, 0.9593, 0.9683, 0.9895,
-             0.9940]]
+               0.9262, 0.9663, 0.8682, 0.9138, 0.9670, 0.9972, 0.9455, 0.9746, 0.9739,
+               0.8536, 0.9330, 0.9677, 0.9122, 0.9801, 0.9643, 0.9199, 0.9624, 0.9878,
+               0.9868],
+              [0.7975, 0.8672, 0.8114, 0.8424, 0.9023, 0.8824, 0.8746, 0.7955, 0.9087,
+               0.9305, 0.9790, 0.8784, 0.9221, 0.9713, 0.9978, 0.9655, 0.9845, 0.9831,
+               0.8695, 0.9458, 0.9756, 0.9353, 0.9899, 0.9723, 0.9593, 0.9683, 0.9895,
+               0.9940]]
 
     line_labels = ["before", "after optimized"]
     x_tick_labels = data_name
 
-    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=None, y_label=y_label,
                     save_name=save_name)
 
 
@@ -648,80 +692,74 @@ def fig_18():
     save_name = "AUC_Comparison_evolution"
     y_label = "AUC"
 
-
     # data[0] 是进化前，data[1] 是进化后
     y_data = [[0.7890, 0.8351, 0.7266, 0.8323, 0.9019, 0.8082, 0.8249, 0.6738, 0.8296, 0.9327,
-             0.9909, 0.7289, 0.8938, 0.9772, 0.9994, 0.9204, 0.9732, 0.9903, 0.7007, 0.8475,
-             0.9589, 0.7007, 0.9884, 0.9075, 0.4934, 0.7994, 0.9441, 0.9733],
-            [0.8027, 0.8474, 0.7530, 0.8568, 0.9090, 0.8065, 0.8423, 0.7078, 0.8321, 0.9392,
-             0.9966, 0.7350, 0.9133, 0.9780, 0.9997, 0.9253, 0.9734, 0.9969, 0.7057, 0.8755,
-             0.9605, 0.7038, 0.9894, 0.9119, 0.5079, 0.8012, 0.9472, 0.9840]]
+               0.9909, 0.7289, 0.8938, 0.9772, 0.9994, 0.9204, 0.9732, 0.9903, 0.7007, 0.8475,
+               0.9589, 0.7007, 0.9884, 0.9075, 0.4934, 0.7994, 0.9441, 0.9733],
+              [0.8027, 0.8474, 0.7530, 0.8568, 0.9090, 0.8065, 0.8423, 0.7078, 0.8321, 0.9392,
+               0.9966, 0.7350, 0.9133, 0.9780, 0.9997, 0.9253, 0.9734, 0.9969, 0.7057, 0.8755,
+               0.9605, 0.7038, 0.9894, 0.9119, 0.5079, 0.8012, 0.9472, 0.9840]]
 
     # 数据集标签
     line_labels = ["before", "after optimized"]
     x_tick_labels = data_name
 
-    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=None, y_label=y_label,
                     save_name=save_name)
+
 
 def fig_19():
     """
     8 个热力图
     """
     data1 = [[0.9015, 0.8729, 0.9055, 0.8981],
-[0.9066, 0.8911, 0.9027, 0.8908],
-[0.8932, 0.8917, 0.8952, 0.8848],
-[0.8716, 0.8875, 0.8875, 0.8900]]
-    draw_hot(data1, "ecoli-1 259/77=3.36", "ecoli-1_hot1")
-
+             [0.9066, 0.8911, 0.9027, 0.8908],
+             [0.8932, 0.8917, 0.8952, 0.8848],
+             [0.8716, 0.8875, 0.8875, 0.8900]]
+    draw_hot(data1, "ecoli-1 259/77=3.36", "hot1_ecoli-1")
 
     data2 = [[0.8545, 0.8422, 0.8442, 0.8476],
-     [0.8599, 0.8520, 0.8514, 0.8533],
-     [0.8526, 0.8563, 0.8548, 0.8582],
-     [0.8402, 0.8443, 0.8443, 0.8515]]
-    draw_hot(data2, "yeast06 388/90=4.32", "yeast06_hot2")
+             [0.8599, 0.8520, 0.8514, 0.8533],
+             [0.8526, 0.8563, 0.8548, 0.8582],
+             [0.8402, 0.8443, 0.8443, 0.8515]]
+    draw_hot(data2, "yeast-06 388/90=4.32", "hot2_yeast-06")
 
     data3 = [[0.7295, 0.7086, 0.7003, 0.6940],
-[0.7333, 0.7225, 0.7041, 0.7246],
-[0.7233, 0.6839, 0.6927, 0.6859],
-[0.7148, 0.7078, 0.7022, 0.7250]]
-    draw_hot(data3, "cleve-2 262/35=7.49", "cleve-2_hot3")
+             [0.7333, 0.7225, 0.7041, 0.7246],
+             [0.7233, 0.6839, 0.6927, 0.6859],
+             [0.7148, 0.7078, 0.7022, 0.7250]]
+    draw_hot(data3, "cleve-2 262/35=7.49", "hot3_cleve-2")
 
     data4 = [[0.8334, 0.8179, 0.8191, 0.7728],
-[0.8002, 0.8130, 0.7626, 0.7546],
-[0.7790, 0.7775, 0.7605, 0.7610],
-[0.7528, 0.7605, 0.7629, 0.7593]]
-    draw_hot(data4, "balance-1 576/49=11.76", "balance-1_hot4")
+             [0.8002, 0.8130, 0.7626, 0.7546],
+             [0.7790, 0.7775, 0.7605, 0.7610],
+             [0.7528, 0.7605, 0.7629, 0.7593]]
+    draw_hot(data4, "balance-1 576/49=11.76", "hot4_balance-1")
 
     data5 = [[0.8712, 0.8601, 0.8348, 0.8110],
-[0.8758, 0.8705, 0.7149, 0.8323],
-[0.7265, 0.7613, 0.7390, 0.7292],
-[0.6741, 0.6860, 0.7494, 0.6789]]
-    draw_hot(data5, "yeast-7vs.1 429/30=14.30", "yeast-7vs.1_hot5")
+             [0.8758, 0.8705, 0.7149, 0.8323],
+             [0.7265, 0.7613, 0.7390, 0.7292],
+             [0.6741, 0.6860, 0.7494, 0.6789]]
+    draw_hot(data5, "yeast-7vs.1 429/30=14.30", "hot5_yeast-7vs.1")
 
     data6 = [[0.9568, 0.9696, 0.9582, 0.9503],
-[0.9648, 0.9546, 0.9529, 0.9586],
-[0.9570, 0.9396, 0.9538, 0.9521],
-[0.9384, 0.9348, 0.9487, 0.9257]]
-    draw_hot(data6, "ecoli-5 316/20=15.80", "ecoli-5_hot6")
+             [0.9648, 0.9546, 0.9529, 0.9586],
+             [0.9570, 0.9396, 0.9538, 0.9521],
+             [0.9384, 0.9348, 0.9487, 0.9257]]
+    draw_hot(data6, "ecoli-5 316/20=15.80", "hot6_ecoli-5")
 
     data7 = [[0.9278, 0.9250, 0.8980, 0.9144],
-[0.9266, 0.9294, 0.9128, 0.8808],
-[0.9180, 0.8715, 0.8901, 0.9005],
-[0.9052, 0.9222, 0.9171, 0.9230]]
-    draw_hot(data7, "yeast-4 1433/51=28.10", "yeast-4_hot7")
-
-
+             [0.9266, 0.9294, 0.9128, 0.8808],
+             [0.9180, 0.8715, 0.8901, 0.9005],
+             [0.9052, 0.9222, 0.9171, 0.9230]]
+    draw_hot(data7, "yeast-4 1433/51=28.10", "hot7_yeast-4")
 
     data8 = [[0.9289, 0.9351, 0.8829, 0.9296],
-[0.9483, 0.9169, 0.9138, 0.9287],
-[0.9323, 0.9077, 0.9353, 0.9216],
-[0.8625, 0.9170, 0.9163, 0.9184]]
-    draw_hot(data8, "yeast-6 1449/35=41.40", "yeast-6_hot8")
-
+             [0.9483, 0.9169, 0.9138, 0.9287],
+             [0.9323, 0.9077, 0.9353, 0.9216],
+             [0.8625, 0.9170, 0.9163, 0.9184]]
+    draw_hot(data8, "yeast-6 1449/35=41.40", "hot8_yeast-6")
 
 
 if __name__ == '__main__':
-    fig_8()
-
-
+    fig_12()
