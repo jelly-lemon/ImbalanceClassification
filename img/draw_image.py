@@ -198,10 +198,11 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
                           color=my_color,
                           edgecolor='black', zorder=9)  # 绘制条状图，zorder 越大，表示绘制顺序越靠后，就会覆盖之前内容，用于覆盖虚线
 
+        #
         # 绘制注释文字
         #
         for xy in zip(draw_point, height):
-            plt.annotate(xy[1], xy=xy, xytext=(-10, 2), textcoords='offset points', fontsize=12, fontproperties='Times New Roman')
+            plt.annotate(xy[1], xy=xy, xytext=(-20, 2), textcoords='offset points', fontsize=24, fontproperties=font2_bold)
         draw_point += unit_inner_space + bar_width  # 下次绘制起始位置
         all_bar.append(bar)
 
@@ -248,7 +249,8 @@ def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None
     # 折线风格
     line_style = ['-', '--', '-.', ':', '-', '--']
 
-    line_color = ['red', 'green']
+    # line_color = ['red', 'green']
+    line_color = ['red', 'tomato', 'black', 'orange', 'green']
 
     x_ticks = [i for i in range(len(x_tick_labels))]
     for i, data in enumerate(y_data):
@@ -388,10 +390,10 @@ def fig_5():
     # x 轴标签
     x_tick_labels = ["RUS-KNN", "SMOTE-KNN", "RUS-DT", "SMOTE-DT", "HABC"]
     # data[0]每个方法最优次数
-    y_data = [[2, 5, 1, 2, 19]]
+    y_data = [[2, 5, 1, 1, 20]]
     y_ticks = np.arange(0, 25, 2)
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
 
@@ -410,7 +412,7 @@ def fig_6():
     y_data = [[1, 1, 1, 5, 20]]
     y_ticks = np.arange(0, 25, 2)
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
 
@@ -433,18 +435,14 @@ def fig_7():
         [0.788, 0.869, 0.830, 0.841, 0.908, 0.888, 0.899, 0.786, 0.918, 0.961, 0.979, 0.873, 0.939, 0.982, 0.998, 0.979,
          0.993, 0.971, 0.879, 0.948, 0.977, 0.931, 0.993, 0.972, 0.950, 0.969, 0.979, 0.998]]
     line_labels = ["RUS-KNN", "SMOTE-KNN", "RUS-DT", "SMOTE-DT", "HABC"]
-    x_tick_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appendicitis-1",
-                     "yeast-0-6", "cleveland-1", "yeast-0", "ecoli-7", "newthyroid-0", "cleveland-2",
-                     "ecoli-4", "page-blo-1-2-3-4", "vowel-0", "ecoli-2-3-5-6", "page-blo-1-2-3", "glass-2",
-                     "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1-4-5-8", "letter-img-1",
-                     "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
-    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=data_name, title=None, y_label=y_label,
                     save_name=save_name)
 
 
 def fig_8():
     """
-    单分类器在每个数据集上的 F1-Score
+    集成学习在每个数据集上的 F1-Score
     """
     title = "Performance on each dataset of ensemble classifier and HABC "
     y_label = "F1-Score"
@@ -461,12 +459,7 @@ def fig_8():
         [0.788, 0.869, 0.830, 0.841, 0.908, 0.888, 0.899, 0.786, 0.918, 0.961, 0.979, 0.873, 0.939, 0.982, 0.998, 0.979,
          0.993, 0.971, 0.879, 0.948, 0.977, 0.931, 0.993, 0.972, 0.950, 0.969, 0.979, 0.998]]
     line_labels = ["RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging", "HABC"]
-    x_tick_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appendicitis-1",
-                     "yeast-0-6", "cleveland-1", "yeast-0", "ecoli-7", "newthyroid-0", "cleveland-2",
-                     "ecoli-4", "page-blo-1-2-3-4", "vowel-0", "ecoli-2-3-5-6", "page-blo-1-2-3", "glass-2",
-                     "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1-4-5-8", "letter-img-1",
-                     "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
-    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=data_name, title=None, y_label=y_label,
                     save_name=save_name)
 
 
@@ -487,14 +480,9 @@ def fig_9():
         [0.639, 0.805, 0.704, 0.658, 0.793, 0.667, 0.706, 0.488, 0.718, 0.876, 0.909, 0.577, 0.705, 0.918, 0.976, 0.811,
          0.944, 1.000, 0.453, 0.591, 0.966, 0.548, 0.908, 0.709, 0.533, 0.652, 0.767, 0.928],
         [0.803, 0.842, 0.760, 0.857, 0.906, 0.828, 0.851, 0.684, 0.831, 0.934, 0.996, 0.738, 0.959, 0.980, 0.999, 0.927,
-         0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.507, 0.816, 0.942, 0.990]]
+         0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.697, 0.816, 0.942, 0.990]]
     line_labels = ["RUS-KNN", "SMOTE-KNN", "RUS-DT", "SMOTE-DT", "HABC"]
-    x_tick_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appendicitis-1",
-                     "yeast-0-6", "cleveland-1", "yeast-0", "ecoli-7", "newthyroid-0", "cleveland-2",
-                     "ecoli-4", "page-blo-1-2-3-4", "vowel-0", "ecoli-2-3-5-6", "page-blo-1-2-3", "glass-2",
-                     "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1-4-5-8", "letter-img-1",
-                     "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
-    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=data_name, title=None, y_label=y_label,
                     save_name=save_name)
 
 
@@ -515,15 +503,10 @@ def fig_10():
         [0.680, 0.889, 0.725, 0.771, 0.906, 0.788, 0.813, 0.501, 0.817, 0.917, 0.995, 0.756, 0.919, 0.982, 0.981, 0.928,
          0.987, 0.990, 0.601, 0.753, 0.956, 0.643, 0.984, 0.874, 0.672, 0.753, 0.903, 0.985],
         [0.803, 0.842, 0.760, 0.857, 0.906, 0.828, 0.851, 0.684, 0.831, 0.934, 0.996, 0.738, 0.959, 0.980, 0.999, 0.927,
-         0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.507, 0.816, 0.942, 0.990]]
+         0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.697, 0.816, 0.942, 0.990]]
 
     line_labels = ["RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging", "HABC"]
-    x_tick_labels = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appendicitis-1",
-                     "yeast-0-6", "cleveland-1", "yeast-0", "ecoli-7", "newthyroid-0", "cleveland-2",
-                     "ecoli-4", "page-blo-1-2-3-4", "vowel-0", "ecoli-2-3-5-6", "page-blo-1-2-3", "glass-2",
-                     "balance-1", "yeast-7vs.1", "ecoli-5", "yeast-7vs.1-4-5-8", "letter-img-1",
-                     "yeast-4", "wine-red-4", "wine-red-8vs.6", "yeast-6", "page-blo-3"]
-    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=title, y_label=y_label,
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=data_name, title=None, y_label=y_label,
                     save_name=save_name)
 
 
@@ -582,7 +565,7 @@ def fig_13():
     # y_ticks = np.arange(0, 25, 2)
     y_ticks = None
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
 
@@ -601,7 +584,7 @@ def fig_14():
     y_data = [[0.790, 0.810, 0.833, 0.838, 0.868]]
     y_ticks = None
 
-    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=title, y_label=y_label,
+    draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
              bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
 
 
@@ -762,4 +745,4 @@ def fig_19():
 
 
 if __name__ == '__main__':
-    fig_12()
+    fig_14()
