@@ -12,12 +12,18 @@ data_name = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appen-1",
 
 font1 = {'family': 'Times New Roman',
          'weight': 'normal',
-         'size': 12,
+         'size': 24,
          }
-font2_bold = {'family': 'Times New Roman',
+
+font1_bold = {'family': 'Times New Roman',
          'weight': 'bold',
-         'size': 16,
-         }
+         'size': 24,
+              }
+
+large_width_fig_size = (24, 9)
+middle_width_fig_size = (21, 9)
+small_width_fig_size = (16, 9) # 4:3
+
 
 
 def draw_box(x, y, title):
@@ -117,24 +123,19 @@ def draw_barh(y_tick_labels, x_data, x_ticks=None, save_name=None, title=None, x
 
 
 def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_label=None, bar_legend=None,
-             x_label_rotation=90):
+             x_label_rotation=90, figsize=(16,9)):
     """
     条形图
     """
-    #
-    # 设置图片比例
-    #
-    plt.figure(figsize=(12, 9))
-
+    # 设置条状图属性
     bar_width = 10  # 条状图高度
-    unit_inner_space = 1  # 单元内间距
-    unit_outer_space = 4  # 单元间间距
+    unit_inner_space = 3  # 单元内间距
+    unit_outer_space = 6  # 单元间间距
 
+    # 设置图片比例
+    plt.figure(figsize=figsize)
 
-
-    #
     # y 轴上标签位置
-    #
     unit_width = bar_width * len(y_data) + unit_inner_space * (len(y_data) - 1)
     total_width = unit_width * len(y_data[0]) + unit_outer_space * (len(y_data[0]) - 1)
     x_label_ticks = []
@@ -143,21 +144,26 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     for i in range(len(y_data[0]) - 1):
         label_tick += unit_outer_space + unit_width
         x_label_ticks.append(label_tick)
-    # plt.xlim([0.45, 1.2]) # 设置 y 轴刻度
-    if y_label is not None:
-        plt.ylabel(y_label, fontdict=font2_bold)
-    plt.xticks(ticks=x_label_ticks, labels=x_tick_labels, rotation=x_label_rotation, fontproperties=font2_bold)
-    if y_ticks is not None:
-        plt.yticks(y_ticks, fontsize=12, fontproperties='Times New Roman')
 
-    #
+    # y 轴刻度范围
+    # plt.xlim([0.45, 1.2])
+
+    # y 轴标签
+    if y_label is not None:
+        plt.ylabel(y_label, fontdict=font1)
+
+    # y 轴刻度
+    plt.yticks(fontproperties=font1)
+    if y_ticks is not None:
+        plt.yticks(y_ticks)
+
+    # x 轴刻度
+    plt.xticks(ticks=x_label_ticks, labels=x_tick_labels, rotation=x_label_rotation, fontproperties=font1)
+
     # 设置背景网格线
-    #
     plt.grid(axis='y', linestyle='--')
 
-    #
     # 计算横坐标起始绘制位置
-    #
     draw_point = []  # 每组数据中每条画点
     point = bar_width / 2
     draw_point.append(point)
@@ -166,17 +172,13 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
         draw_point.append(point)
     draw_point = np.array(draw_point)
 
-    #
     # 每组数据的颜色
-    #
     # my_color = ['lightgrey', 'darkgrey', 'grey', 'dimgrey', 'black']
     # my_color = ['lightgrey', 'dimgrey']
     # my_color = ['white', 'darkgrey']
     my_color = ['white']
 
-    #
     # 填充物
-    #
     patterns = ('-', '+', 'x', '\\', '*', 'o', 'O', '.')
     patterns = (' ', '//')
 
@@ -185,24 +187,23 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     for i, height in enumerate(y_data):
         # 需要颜色就添加 color=my_color 参数
         # 填充物  hatch=patterns，每组数据一种填充类型
-        # bar = plt.bar(x=draw_point, width=bar_width, height=height,
-        #               hatch=patterns[i],
-        #               color=my_color,
-        #               edgecolor='black', zorder=9)
-        #
-        # 为了绘制每一个“条”都有填充物，这里用一个 for 循环
-        #
-        for j, h in enumerate(height):
-            bar = plt.bar(x=draw_point[j], width=bar_width, height=height[j],
-                          hatch=patterns[j%2],
+        if len(y_data) > 1:
+            bar = plt.bar(x=draw_point, width=bar_width, height=height,
+                          hatch=patterns[i],
                           color=my_color,
-                          edgecolor='black', zorder=9)  # 绘制条状图，zorder 越大，表示绘制顺序越靠后，就会覆盖之前内容，用于覆盖虚线
+                          edgecolor='black', zorder=9)
+        elif len(y_data) == 1:
+            # 为了绘制每一个“条”都有填充物，这里用一个 for 循环
+            for j, h in enumerate(height):
+                bar = plt.bar(x=draw_point[j], width=bar_width, height=height[j],
+                              hatch=patterns[j%2],
+                              color=my_color,
+                              edgecolor='black', zorder=9)  # 绘制条状图，zorder 越大，表示绘制顺序越靠后，就会覆盖之前内容，用于覆盖虚线
 
-        #
         # 绘制注释文字
-        #
         for xy in zip(draw_point, height):
-            plt.annotate(xy[1], xy=xy, xytext=(-20, 2), textcoords='offset points', fontsize=24, fontproperties=font2_bold)
+            plt.annotate(text=xy[1], xy=xy, xytext=(-20, 6), textcoords='offset points', fontproperties=font1)
+
         draw_point += unit_inner_space + bar_width  # 下次绘制起始位置
         all_bar.append(bar)
 
@@ -210,7 +211,7 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     # 图例
     #
     if bar_legend is not None:
-        plt.legend(all_bar, bar_legend, loc="best", prop=font2_bold)  # 还有 upper right 等
+        plt.legend(all_bar, bar_legend, loc="best", prop=font1)  # 还有 upper right 等
 
     #
     # 标题
@@ -234,12 +235,12 @@ def draw_bar(x_tick_labels, y_data, y_ticks=None, save_name=None, title=None, y_
     plt.show()
 
 
-def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None, bar_legend=None, save_name=None):
+def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None, bar_legend=None, save_name=None, figsize=large_width_fig_size):
     """
     折线图
     """
     # 设置图片比例
-    plt.figure(figsize=(24, 9))
+    plt.figure(figsize=figsize)
 
     # 网格线
     plt.grid(axis='y', linestyle='--')
@@ -249,8 +250,8 @@ def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None
     # 折线风格
     line_style = ['-', '--', '-.', ':', '-', '--']
 
-    # line_color = ['red', 'green']
-    line_color = ['red', 'tomato', 'black', 'orange', 'green']
+    line_color = ['red', 'green']
+    # line_color = ['red', 'tomato', 'black', 'orange', 'green']
 
     x_ticks = [i for i in range(len(x_tick_labels))]
     for i, data in enumerate(y_data):
@@ -258,13 +259,14 @@ def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None
         plt.plot(x_ticks, data, marker=markers[i], label=line_labels[i], linewidth=3,
                  markersize=16, linestyle=line_style[i], color=line_color[i])
 
-    plt.xticks(x_ticks, labels=x_tick_labels, rotation=30, fontproperties=font2_bold)
-    plt.legend(loc="best", prop=font2_bold)
+    plt.xticks(x_ticks, labels=x_tick_labels, rotation=30, fontproperties=font1)
+    plt.legend(loc="best", prop=font1)
 
     if title is not None:
         plt.title(title)
+    plt.yticks(fontproperties=font1)
     if y_label is not None:
-        plt.ylabel(y_label,  fontdict=font2_bold)
+        plt.ylabel(y_label, fontdict=font1)
     if save_name is not None:
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
         plt.savefig("./png_img/" + save_name + ".png", dpi=300, bbox_inches='tight')
@@ -274,22 +276,22 @@ def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None
     plt.show()
 
 
-def draw_some_line_chart(x_ticks, y_data, n_row, n_col, title, sub_title, x_label, y_label, save_name=None):
+def draw_some_line_chart(x_ticks, y_data, n_row, n_col, title, sub_title, x_label, y_label, save_name=None, figsize=large_width_fig_size):
     """
     画多个对比折现图
     """
-    figure, axes = plt.subplots(n_row, n_col, figsize=(16, 6), constrained_layout=True)
+    figure, axes = plt.subplots(n_row, n_col, figsize=figsize, constrained_layout=True)
     for i in range(n_row):
         for j in range(n_col):
             axes[i][j].plot(x_ticks, y_data[n_col * i + j])
-            axes[i][j].set_title(sub_title[n_col * i + j])
-            axes[i][j].set_xlabel(x_label)
-            axes[i][j].set_ylabel(y_label)
+            axes[i][j].set_title(sub_title[n_col * i + j], fontdict=font1)
+            # axes[i][j].set_xlabel(x_label)
+            # axes[i][j].set_ylabel(y_label)
             axes[i][j].set_xticks(x_ticks)
             # axes[i][j].set_ylim([0.9, 1])
             axes[i][j].yaxis.set_major_formatter(mtick.FormatStrFormatter('%.4f'))
-
-    plt.suptitle(title, fontsize=16)
+    # 主标题
+    # plt.suptitle(title, fontsize=16)
 
     if save_name is not None:
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
@@ -320,7 +322,7 @@ def fig_1():
          87]]
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name, x_label_rotation=90)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=30, figsize=large_width_fig_size)
 
 
 def fig_2():
@@ -338,7 +340,7 @@ def fig_2():
     y_data = [[10, 9, 5, 8, 7, 7, 8, 13, 8, 7, 5, 13, 7, 10, 13, 7, 10, 9, 4, 8, 7, 8, 16, 8, 11, 2, 10, 5]]
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=30, figsize=large_width_fig_size)
 
 
 def fig_3():
@@ -357,7 +359,7 @@ def fig_3():
     y_ticks = np.arange(0, 25, 2)
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0, figsize=small_width_fig_size)
 
 
 def fig_4():
@@ -375,7 +377,7 @@ def fig_4():
     y_ticks = np.arange(0, 20, 2)
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
-             save_name=save_name, x_label_rotation=0)
+             save_name=save_name, x_label_rotation=0, figsize=small_width_fig_size)
 
 
 def fig_5():
@@ -394,7 +396,7 @@ def fig_5():
     y_ticks = np.arange(0, 25, 2)
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0, figsize=small_width_fig_size)
 
 
 def fig_6():
@@ -413,7 +415,7 @@ def fig_6():
     y_ticks = np.arange(0, 25, 2)
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0, figsize=small_width_fig_size)
 
 
 def fig_7():
@@ -437,7 +439,7 @@ def fig_7():
     line_labels = ["RUS-KNN", "SMOTE-KNN", "RUS-DT", "SMOTE-DT", "HABC"]
 
     draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=data_name, title=None, y_label=y_label,
-                    save_name=save_name)
+                    save_name=save_name, figsize=large_width_fig_size)
 
 
 def fig_8():
@@ -460,7 +462,7 @@ def fig_8():
          0.993, 0.971, 0.879, 0.948, 0.977, 0.931, 0.993, 0.972, 0.950, 0.969, 0.979, 0.998]]
     line_labels = ["RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging", "HABC"]
     draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=data_name, title=None, y_label=y_label,
-                    save_name=save_name)
+                    save_name=save_name, figsize=large_width_fig_size)
 
 
 def fig_9():
@@ -483,7 +485,7 @@ def fig_9():
          0.996, 0.995, 0.704, 0.874, 0.961, 0.715, 0.991, 0.923, 0.697, 0.816, 0.942, 0.990]]
     line_labels = ["RUS-KNN", "SMOTE-KNN", "RUS-DT", "SMOTE-DT", "HABC"]
     draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=data_name, title=None, y_label=y_label,
-                    save_name=save_name)
+                    save_name=save_name, figsize=large_width_fig_size)
 
 
 def fig_10():
@@ -507,7 +509,7 @@ def fig_10():
 
     line_labels = ["RandomForest", "AdaBoost", "EasyEnsemble", "BalancedBagging", "HABC"]
     draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=data_name, title=None, y_label=y_label,
-                    save_name=save_name)
+                    save_name=save_name, figsize=large_width_fig_size)
 
 
 def fig_11():
@@ -527,7 +529,7 @@ def fig_11():
     y_ticks = None
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0, figsize=small_width_fig_size)
 
 
 def fig_12():
@@ -546,7 +548,7 @@ def fig_12():
     y_ticks = None
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0, figsize=small_width_fig_size)
 
 
 def fig_13():
@@ -566,7 +568,7 @@ def fig_13():
     y_ticks = None
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0, figsize=small_width_fig_size)
 
 
 def fig_14():
@@ -585,7 +587,7 @@ def fig_14():
     y_ticks = None
 
     draw_bar(x_tick_labels=x_tick_labels, y_data=y_data, y_ticks=y_ticks, title=None, y_label=y_label,
-             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0)
+             bar_legend=bar_legend, save_name=save_name, x_label_rotation=0, figsize=small_width_fig_size)
 
 
 def fig_15():
@@ -611,8 +613,8 @@ def fig_15():
                0.9754, 0.9769, 0.9754, 0.9769, 0.9712, 0.9727, 0.9740, 0.9783],
               [0.9643, 0.9771, 0.9754, 0.9754, 0.9719, 0.9735, 0.9789, 0.9701, 0.9735, 0.9718, 0.9718, 0.9718, 0.9736,
                0.9754, 0.9719, 0.9754, 0.9807, 0.9842, 0.9789, 0.9735, 0.9754]]
-    draw_some_line_chart(x_ticks, y_data, 2, 3, title=total_title, sub_title=sub_title, x_label=x_label,
-                         y_label=y_label, save_name=save_name)
+    draw_some_line_chart(x_ticks, y_data, 2, 3, title=None, sub_title=sub_title, x_label=x_label,
+                         y_label=y_label, save_name=save_name, figsize=large_width_fig_size)
 
 
 def fig_16():
@@ -638,8 +640,8 @@ def fig_16():
               [0.9075, 0.9059, 0.9045, 0.9080, 0.9157, 0.9146, 0.9178, 0.9209, 0.9204, 0.9186, 0.9206, 0.9232, 0.9171,
                0.9179, 0.9129, 0.9168, 0.9111, 0.9146, 0.9180, 0.9180, 0.9163]]
 
-    draw_some_line_chart(x_ticks, y_data, 2, 3, title=total_title, sub_title=sub_title, x_label=x_label,
-                         y_label=y_label, save_name=save_name)
+    draw_some_line_chart(x_ticks, y_data, 2, 3, title=None, sub_title=sub_title, x_label=x_label,
+                         y_label=y_label, save_name=save_name, figsize=large_width_fig_size)
 
 
 def fig_17():
@@ -664,7 +666,7 @@ def fig_17():
     x_tick_labels = data_name
 
     draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=None, y_label=y_label,
-                    save_name=save_name)
+                    save_name=save_name, figsize=large_width_fig_size)
 
 
 def fig_18():
@@ -745,4 +747,4 @@ def fig_19():
 
 
 if __name__ == '__main__':
-    fig_14()
+    fig_18()
