@@ -245,28 +245,40 @@ def draw_line_chart(y_data, line_labels, x_tick_labels, title=None, y_label=None
     # 网格线
     plt.grid(axis='y', linestyle='--')
 
+    # 记号
     markers = ["^", "P", "x", "v", "p", "o", "s", "d", "D"]
 
     # 折线风格
-    line_style = ['-', '--', '-.', ':', '-', '--']
+    line_style = ['--', '-', '--', '-']
+    # line_style = ['-', '--', '-.', ':', '-', '--']
 
-    line_color = ['red', 'green']
+    # 颜色
+    line_color = ['red', 'green', 'black', 'orange']
     # line_color = ['red', 'tomato', 'black', 'orange', 'green']
 
+    # 绘制折线图
     x_ticks = [i for i in range(len(x_tick_labels))]
     for i, data in enumerate(y_data):
         # 第一个参数是横坐标，第二个参数纵坐标，第三个参数表示该数据的标签，legend 用得着
         plt.plot(x_ticks, data, marker=markers[i], label=line_labels[i], linewidth=3,
                  markersize=16, linestyle=line_style[i], color=line_color[i])
 
+    # 横坐标
     plt.xticks(x_ticks, labels=x_tick_labels, rotation=30, fontproperties=font1)
+
+    # 图例
     plt.legend(loc="best", prop=font1)
 
+    # 标题
     if title is not None:
         plt.title(title)
+
+    # 纵坐标
     plt.yticks(fontproperties=font1)
     if y_label is not None:
         plt.ylabel(y_label, fontdict=font1)
+
+    # 保存图片
     if save_name is not None:
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
         plt.savefig("./png_img/" + save_name + ".png", dpi=300, bbox_inches='tight')
@@ -745,6 +757,38 @@ def fig_19():
              [0.8625, 0.9170, 0.9163, 0.9184]]
     draw_hot(data8, "yeast-6 1449/35=41.40", "hot8_yeast-6")
 
+def fig_20():
+    """
+    进化前后对比图，F1-Score，AUC
+    """
+    title = "Comparison of before and after evolution"
+    save_name = "Comparison_before_after_evolution"
+    y_label = ""
+
+    # data[0] 是进化前，data[1] 是进化后
+    F1_y_data = [[0.7842, 0.8612, 0.8081, 0.8362, 0.8920, 0.8824, 0.8698, 0.7713, 0.9004,
+               0.9262, 0.9663, 0.8682, 0.9138, 0.9670, 0.9972, 0.9455, 0.9746, 0.9739,
+               0.8536, 0.9330, 0.9677, 0.9122, 0.9801, 0.9643, 0.9199, 0.9624, 0.9878,
+               0.9868],
+              [0.7975, 0.8672, 0.8114, 0.8424, 0.9023, 0.8824, 0.8746, 0.7955, 0.9087,
+               0.9305, 0.9790, 0.8784, 0.9221, 0.9713, 0.9978, 0.9655, 0.9845, 0.9831,
+               0.8695, 0.9458, 0.9756, 0.9353, 0.9899, 0.9723, 0.9593, 0.9683, 0.9895,
+               0.9940]]
+    AUC_y_data = [[0.7890, 0.8351, 0.7266, 0.8323, 0.9019, 0.8082, 0.8249, 0.6738, 0.8296, 0.9327,
+               0.9909, 0.7289, 0.8938, 0.9772, 0.9994, 0.9204, 0.9732, 0.9903, 0.7007, 0.8475,
+               0.9589, 0.7007, 0.9884, 0.9075, 0.4934, 0.7994, 0.9441, 0.9733],
+              [0.8027, 0.8474, 0.7530, 0.8568, 0.9090, 0.8065, 0.8423, 0.7078, 0.8321, 0.9392,
+               0.9966, 0.7350, 0.9133, 0.9780, 0.9997, 0.9253, 0.9734, 0.9969, 0.7057, 0.8755,
+               0.9605, 0.7038, 0.9894, 0.9119, 0.5079, 0.8012, 0.9472, 0.9840]]
+    y_data = F1_y_data + AUC_y_data
+
+    # 数据集标签
+    line_labels = ["F1 before", "F1 after evolution", "AUC before", "AUC after evolution"]
+    x_tick_labels = data_name
+
+    draw_line_chart(y_data, line_labels=line_labels, x_tick_labels=x_tick_labels, title=None, y_label=y_label,
+                    save_name=save_name)
+
 
 if __name__ == '__main__':
-    fig_18()
+    fig_20()
