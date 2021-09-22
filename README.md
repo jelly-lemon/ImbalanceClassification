@@ -5,16 +5,18 @@
 基于聚类的过采样（Cluster-Based Over Sampling）   
 合成少数类过采样（SMOTE）   
 
-## 算法层面
+## 集成算法
 Bagging   
 Boosting
 
 
-## 分类器
-k-Nearest Neighbors （K近邻算法）
-Support Vector Machines (SVM)（支持向量机）
-Decision Trees（决策树）
+## 分类算法
+k-Nearest Neighbors （K近邻算法）   
+Support Vector Machines (SVM)（支持向量机）   
+Decision Trees（决策树）   
 
 # 项目环境
-sklearn   
-imblearn   
+操作系统：Win 10   
+使用 IDE：PyCharm   
+运行环境：Python 3.6   
+相关 Python 包： sklearn、imblearn     

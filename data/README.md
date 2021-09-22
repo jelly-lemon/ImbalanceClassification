@@ -1,4 +1,4 @@
-本目录包含了用到的数据集，读取数据的相关函数
+本目录包含了用到的数据集，读取数据的相关函数。
 
 # 数据集命名规则
 原始数据集名-负样本类别下标号 vs. 正样本类别下标号   
@@ -10,9 +10,6 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 
 
 # 数据集信息
-
-
-
 ## 1 < IR <= 5
 |data sets              |class  |attributes     |IR             |Other
 |----                   |----   |----           |----           |----  
@@ -31,8 +28,6 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 |zoo-1	                |7	    |16	            |81/20=4.05     |数据太多简单
 |yeast-0-6	            |10	    |8	            |1205/279=4.32  |
 |cleveland-1	        |5	    |13	            |243/54=4.50    |
-
-
 
 
 ## 5 < IR <= 10
@@ -88,7 +83,6 @@ UCI：http://archive.ics.uci.edu/ml/datasets.php
 |winequality-red-4	    |11	    |11	        |1546/53=29.17  | 
 
 ## 30 < IR <= 35
-
 
 
 ## 35 < IR <= 40
