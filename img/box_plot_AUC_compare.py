@@ -123,9 +123,9 @@ title_font = {'family': 'Times New Roman',
               'weight': 'bold',
               'size': 24,
               }
-sub_title = ["yeast-1 IR=2", "yeast-06 IR=4", "cleve-1 IR=4",
-             "newth-0 IR=6", "ecoli-4 IR=8", "ecoli-2356 IR=10",
-             "balance-1 IR=11", "yeast-4 IR=28", "yeast IR=41"]
+sub_title = ["yeast-1 IR=2", "yeast-06 IR=4", "cleve-1 IR=5",
+             "newth-0 IR=6", "ecoli-4 IR=9", "ecoli-2356 IR=11",
+             "balance-1 IR=12", "yeast-4 IR=28", "yeast IR=41"]
 sub_title_font = {'family': 'Times New Roman',
                   'weight': 'bold',
                   'size': 16,

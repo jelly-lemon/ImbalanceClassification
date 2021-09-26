@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 # plt.style.use('ggplot') # 图像风格
 import matplotlib.ticker as mtick
-# import seaborn as sns
+import seaborn as sns
 import numpy as np
 
 data_name = ["bands-0", "glass-0", "tae-0", "yeast-1", "ecoli-1", "appen-1",
@@ -61,7 +61,6 @@ def draw_hot(data, title="", save_name=""):
     if save_name != "":
         # savefig 必须在 show 之前，因为 show 会默认打开一个新的画板，导致 savefig 为空白
         plt.savefig("./png_img/" + save_name + ".png", dpi=300, bbox_inches='tight')
-        plt.savefig("./svg_img/" + save_name + ".svg", dpi=300, bbox_inches='tight')
         plt.savefig("./eps_img/" + save_name + ".eps", dpi=300, bbox_inches='tight')
 
     plt.show()
@@ -755,49 +754,49 @@ def fig_19():
              [0.9066, 0.8911, 0.9027, 0.8908],
              [0.8932, 0.8917, 0.8952, 0.8848],
              [0.8716, 0.8875, 0.8875, 0.8900]]
-    draw_hot(data1, "ecoli-1 259/77=3.36", "hot1_ecoli-1")
+    draw_hot(data1, "ecoli-1 IR=3", "hot1_ecoli-1")
 
     data2 = [[0.8545, 0.8422, 0.8442, 0.8476],
              [0.8599, 0.8520, 0.8514, 0.8533],
              [0.8526, 0.8563, 0.8548, 0.8582],
              [0.8402, 0.8443, 0.8443, 0.8515]]
-    draw_hot(data2, "yeast-06 388/90=4.32", "hot2_yeast-06")
+    draw_hot(data2, "yeast-06 IR=4", "hot2_yeast-06")
 
     data3 = [[0.7295, 0.7086, 0.7003, 0.6940],
              [0.7333, 0.7225, 0.7041, 0.7246],
              [0.7233, 0.6839, 0.6927, 0.6859],
              [0.7148, 0.7078, 0.7022, 0.7250]]
-    draw_hot(data3, "cleve-2 262/35=7.49", "hot3_cleve-2")
+    draw_hot(data3, "cleve-2 IR=7", "hot3_cleve-2")
 
     data4 = [[0.8334, 0.8179, 0.8191, 0.7728],
              [0.8002, 0.8130, 0.7626, 0.7546],
              [0.7790, 0.7775, 0.7605, 0.7610],
              [0.7528, 0.7605, 0.7629, 0.7593]]
-    draw_hot(data4, "balance-1 576/49=11.76", "hot4_balance-1")
+    draw_hot(data4, "balance-1 IR=12", "hot4_balance-1")
 
     data5 = [[0.8712, 0.8601, 0.8348, 0.8110],
              [0.8758, 0.8705, 0.7149, 0.8323],
              [0.7265, 0.7613, 0.7390, 0.7292],
              [0.6741, 0.6860, 0.7494, 0.6789]]
-    draw_hot(data5, "yeast-7vs.1 429/30=14.30", "hot5_yeast-7vs.1")
+    draw_hot(data5, "yeast-7vs.1 IR=14", "hot5_yeast-7vs.1")
 
     data6 = [[0.9568, 0.9696, 0.9582, 0.9503],
              [0.9648, 0.9546, 0.9529, 0.9586],
              [0.9570, 0.9396, 0.9538, 0.9521],
              [0.9384, 0.9348, 0.9487, 0.9257]]
-    draw_hot(data6, "ecoli-5 316/20=15.80", "hot6_ecoli-5")
+    draw_hot(data6, "ecoli-5 IR=16", "hot6_ecoli-5")
 
     data7 = [[0.9278, 0.9250, 0.8980, 0.9144],
              [0.9266, 0.9294, 0.9128, 0.8808],
              [0.9180, 0.8715, 0.8901, 0.9005],
              [0.9052, 0.9222, 0.9171, 0.9230]]
-    draw_hot(data7, "yeast-4 1433/51=28.10", "hot7_yeast-4")
+    draw_hot(data7, "yeast-4 IR=28", "hot7_yeast-4")
 
     data8 = [[0.9289, 0.9351, 0.8829, 0.9296],
              [0.9483, 0.9169, 0.9138, 0.9287],
              [0.9323, 0.9077, 0.9353, 0.9216],
              [0.8625, 0.9170, 0.9163, 0.9184]]
-    draw_hot(data8, "yeast-6 1449/35=41.40", "hot8_yeast-6")
+    draw_hot(data8, "yeast-6 IR=41", "hot8_yeast-6")
 
 
 def fig_20():
@@ -870,4 +869,4 @@ def fig_21():
 
 
 if __name__ == '__main__':
-    fig_21()
+    fig_19()
