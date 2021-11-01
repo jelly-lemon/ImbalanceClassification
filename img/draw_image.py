@@ -53,7 +53,7 @@ def draw_hot(data, title="", save_name=""):
                       cmap='YlGnBu',
                       ax=ax1)
     ax1.set_xlabel("$N_{under}$", fontsize=16)
-    ax1.set_ylabel("$N_{up}$", fontsize=16, rotation=0)
+    ax1.set_ylabel("$N_{over}$", fontsize=16, rotation=0)
     ax1.set_xticklabels(ticklabel, fontsize=16)
     ticklabel.reverse()
     ax1.set_yticklabels(ticklabel, fontsize=16, rotation=0)  # 加上 rotation=0， heatmap 会旋转 90
@@ -778,7 +778,7 @@ def fig_19():
              [0.8758, 0.8705, 0.7149, 0.8323],
              [0.7265, 0.7613, 0.7390, 0.7292],
              [0.6741, 0.6860, 0.7494, 0.6789]]
-    draw_hot(data5, "yeast-7vs.1 IR=14", "hot5_yeast-7vs.1")
+    draw_hot(data5, "yeast-7vs1 IR=14", "hot5_yeast-7vs.1")
 
     data6 = [[0.9568, 0.9696, 0.9582, 0.9503],
              [0.9648, 0.9546, 0.9529, 0.9586],

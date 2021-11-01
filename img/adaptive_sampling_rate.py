@@ -2,6 +2,7 @@ from math import log
 
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 
 
 # delta
@@ -33,15 +34,18 @@ ax[0].set_ylabel("under-sampling rate", fontdict=my_font)
 ax[0].legend(prop=my_font)
 
 # 过采样率
+x_IR = [i for i in range(2, 21)]
+all_delta = [1/log(IR, 2) for IR in x_IR]
 y_r_balance = np.array(x_IR) - 1
 y_r_min = np.array(y_r_balance) - np.array(all_delta)/2
 y_r_max = np.array(y_r_balance) + np.array(all_delta)/2
 
 ax[1].plot(x_IR, y_r_balance, label="balanced over-sampling rate")
 ax[1].plot(x_IR, y_r_min,  linestyle='--', label="min over-sampling rate")
-ax[1].plot(x_IR, y_r_max,  linestyle='--', label="max over-sampling rate")
+ax[1].plot(x_IR, y_r_max,  linestyle='--', label="max under-sampling rate")
 ax[1].set_xlabel("IR", fontdict=my_font)
 ax[1].set_ylabel("over-sampling rate", fontdict=my_font)
+ax[1].xaxis.set_major_formatter(FormatStrFormatter('%d'))
 ax[1].legend(prop=my_font)
 
 
