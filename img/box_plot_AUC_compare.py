@@ -128,7 +128,7 @@ sub_title = ["yeast-1 IR=2", "yeast-06 IR=4", "cleve-1 IR=5",
              "balance-1 IR=12", "yeast-4 IR=28", "yeast IR=41"]
 sub_title_font = {'family': 'Times New Roman',
                   'weight': 'bold',
-                  'size': 16,
+                  'size': 24,
                   }
 nums = 9
 all_data = [
@@ -226,7 +226,7 @@ all_data = [
 nrows = 3
 ncols = 3
 
-fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(16, 9))
+fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(30, 10))
 # fig.suptitle(title)
 # 子图间距 wspace为水平间隔，hspace为垂直间隔
 fig.subplots_adjust(wspace=0.2, hspace=0.4)
@@ -235,8 +235,16 @@ for i in range(nrows):
         bplot = axes[i][j].boxplot(all_data[i * nrows + j], )
         axes[i][j].set_title(sub_title[i * nrows + j], fontdict=sub_title_font)
 
+        for x1 in axes[i][j].get_xticklabels():
+            x1.set_fontname('Times New Roman')
+            x1.set_fontsize('24')
+        for y1 in axes[i][j].get_yticklabels():
+            y1.set_fontname('Times New Roman')
+            y1.set_fontsize('24')
+
 plt.setp(axes, xticks=[1, 2, 3, 4, 5, 6, 7, 8, 9],
          xticklabels=x_labels)
+
 
 
 save_name = "box_line_AUC_compare"
